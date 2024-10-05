@@ -223,8 +223,44 @@ fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, addres
 
 // Route für die Admin-Seite, mit Passwortüberprüfung per Formular
 fastify.get('/admin', async (request, reply) => {
-  return reply.view('/src/pages/admin.hbs', { showPasswordForm: true });
+  const key = request.query.key;
+
+  // Überprüfe den Admin-Schlüssel
+  if (key !== process.env.ADMIN_KEY) {
+    return reply.view('/src/pages/admin.hbs', { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
+  }
+
+  try {
+    // Standort-Daten aus der Datenbank holen
+    const logs = await new Promise((resolve, reject) => {
+      db.all('SELECT id, bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges FROM locations ORDER BY id DESC', (err, rows) => {
+        if (err) {
+          console.error('Fehler bei der Datenbankabfrage:', err);
+          return reject(err);
+        }
+
+        console.log('Abgerufene Standort-Daten:', rows);  // Debug-Ausgabe der abgerufenen Daten
+        resolve(rows);
+      });
+    });
+
+    if (logs.length > 0) {
+      console.log('Logs an das Template übergeben:', logs);
+      return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
+    } else {
+      console.log("Keine Standortdaten in der Datenbank vorhanden.");
+      return reply.view('/src/pages/admin.hbs', { error: "Keine Standorte gefunden!" });
+    }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Standorte:', error);
+    return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
+  }
 });
+
+
+
+
+
 
 // Route zur Admin-Login-Überprüfung
 fastify.post('/admin/login', async (request, reply) => {
