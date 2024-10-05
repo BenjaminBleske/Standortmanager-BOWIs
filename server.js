@@ -40,7 +40,9 @@ fastify.get("/", async (request, reply) => {
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
-    const erstellungszeit = new Date().toISOString().split('T')[1].split('.')[0];
+   // Zeit um 2 Stunden vorverlegen (UTC+2)
+    const erstellungszeit = new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString().split('T')[1].split('.')[0]; // Uhrzeit hinzufügen
+
 
     if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
@@ -73,30 +75,48 @@ fastify.get("/last-locations", (req, reply) => {
   });
 });
 
-// Download all locations as CSV
-fastify.get("/download-csv", async (request, reply) => {
+
+// Route to download all locations as a CSV file
+fastify.get('/download-csv', async (request, reply) => {
   try {
+    // Fetch all locations from the database
     const rows = await new Promise((resolve, reject) => {
-      db.all("SELECT * FROM locations", [], (err, rows) => {
-        if (err) reject(err);
-        resolve(rows);
+      db.all('SELECT * FROM locations', [], (err, rows) => {
+        if (err) {
+          return reject(err); // Reject if there's an error
+        }
+        resolve(rows); // Resolve with rows if successful
       });
     });
 
     if (!rows.length) {
-      return reply.status(404).send({ error: "Keine Daten in der Datenbank vorhanden" });
+      return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
+    // Convert the rows to CSV format with erstellungszeit
     const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
     const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges\n" + csvData;
 
+    // Get the current date and time for the filename
+    const now = new Date();
+    now.setHours(now.getHours() + 2); // Adjust time by 2 hours
+
+    const date = now.toISOString().split('T')[0]; // yyyy-mm-dd
+    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    const filename = `${date}_Sicherungskopie_${time}.csv`;
+
+    // Set the response type to CSV with dynamic filename
     reply.header('Content-Type', 'text/csv');
-    reply.header('Content-Disposition', 'attachment; filename="locations.csv"');
-    return reply.send(csvContent);
+    reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+    return reply.send(csvContent); // Send the CSV data
+
   } catch (err) {
+    console.error("Fehler beim Abrufen der CSV-Daten:", err);
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
 });
+
+
 
 // Admin page with password authentication
 fastify.get("/admin", async (request, reply) => {
