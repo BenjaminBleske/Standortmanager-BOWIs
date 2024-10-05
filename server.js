@@ -16,7 +16,23 @@ fastify.register(require("@fastify/view"), {
   },
 });
 
-// Ensure the database and table exist
+// Funktion zur Adressabfrage mit OpenStreetMap API
+async function fetchAddress(lat, lon) {
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    if (!response.ok) {
+      throw new Error(`OSM API Error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.display_name || 'Adresse nicht gefunden';
+  } catch (error) {
+    console.error("Fehler bei der Adressabfrage:", error);
+    return 'Adresse nicht gefunden';
+  }
+}
+
+
+// Ensure the database and table exist with new 'adresse' column
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS locations (
@@ -26,66 +42,82 @@ db.serialize(() => {
       erstellungszeit TEXT,
       x_coord REAL,
       y_coord REAL,
-      sonstiges TEXT
+      sonstiges TEXT,
+      adresse TEXT  -- Neue Spalte für die Adresse
     )
   `);
 });
+
 
 // Home route (renders index.hbs)
 fastify.get("/", async (request, reply) => {
   return reply.view("/src/pages/index.hbs");
 });
 
-// Save location to the database
+// Save location to the database including the address
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
-   // Zeit um 2 Stunden vorverlegen (UTC+2)
-    const erstellungszeit = new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString().split('T')[1].split('.')[0]; // Uhrzeit hinzufügen
-
-
+    
     if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
+    // Adresse basierend auf den Koordinaten abrufen
+    console.log("Adresse wird abgerufen für:", y_coord, x_coord);
+    const adresse = await fetchAddress(y_coord, x_coord);
+    console.log("Adresse erfolgreich abgerufen:", adresse);
+
+    const erstellungszeit = new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString().split('T')[1].split('.')[0]; // Uhrzeit hinzufügen
+
     const result = await new Promise((resolve, reject) => {
       db.run(
-        `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || ''],
+        `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges, adresse) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || '', adresse],
         function (err) {
-          if (err) reject(err);
-          resolve(this.lastID);
+          if (err) {
+            console.error("Fehler beim Schreiben in die Datenbank:", err);
+            reject(err);
+          } else {
+            console.log("Datensatz erfolgreich gespeichert:", this.lastID);
+            resolve(this.lastID);
+          }
         }
       );
     });
 
     return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!", id: result });
   } catch (err) {
+    console.error("Fehler in /saveLocation:", err);
     return reply.code(500).send({ status: "error", message: "Interner Serverfehler" });
   }
 });
 
-// Fetch the last 5 locations
+
+
+
+// Fetch the last 5 locations including the address
 fastify.get("/last-locations", (req, reply) => {
   db.all("SELECT * FROM locations ORDER BY id DESC LIMIT 5", [], (err, rows) => {
     if (err) {
       return reply.code(500).send({ error: "Fehler beim Abrufen der Standorte" });
     }
-    return reply.send(rows);
+    return reply.send(rows);  // Adresse ist jetzt auch in den Ergebnissen
   });
 });
 
 
-// Route to download all locations as a CSV file
+
+
+// Route to download all locations as a CSV file including the address
 fastify.get('/download-csv', async (request, reply) => {
   try {
-    // Fetch all locations from the database
     const rows = await new Promise((resolve, reject) => {
       db.all('SELECT * FROM locations', [], (err, rows) => {
         if (err) {
-          return reject(err); // Reject if there's an error
+          return reject(err);
         }
-        resolve(rows); // Resolve with rows if successful
+        resolve(rows);
       });
     });
 
@@ -93,28 +125,23 @@ fastify.get('/download-csv', async (request, reply) => {
       return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
-    // Convert the rows to CSV format with erstellungszeit
-    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
-    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges\n" + csvData;
+    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges},${row.adresse}`).join('\n');
+    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges,adresse\n" + csvData;
 
-    // Get the current date and time for the filename
     const now = new Date();
-    now.setHours(now.getHours() + 2); // Adjust time by 2 hours
-
-    const date = now.toISOString().split('T')[0]; // yyyy-mm-dd
-    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    now.setHours(now.getHours() + 2);
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
     const filename = `${date}_Sicherungskopie_${time}.csv`;
 
-    // Set the response type to CSV with dynamic filename
     reply.header('Content-Type', 'text/csv');
     reply.header('Content-Disposition', `attachment; filename="${filename}"`);
-    return reply.send(csvContent); // Send the CSV data
-
+    return reply.send(csvContent);
   } catch (err) {
-    console.error("Fehler beim Abrufen der CSV-Daten:", err);
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
 });
+
 
 
 
