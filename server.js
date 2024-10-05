@@ -18,23 +18,7 @@ fastify.register(require("@fastify/view"), {
   },
 });
 
-// Funktion zur Adressabfrage mit OpenStreetMap API
-async function fetchAddress(lat, lon) {
-  try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    if (!response.ok) {
-      throw new Error(`OSM API Error: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data.display_name || 'Adresse nicht gefunden';
-  } catch (error) {
-    console.error("Fehler bei der Adressabfrage:", error);
-    return 'Adresse nicht gefunden';
-  }
-}
-
-
-// Ensure the database and table exist with new 'adresse' column
+// Prüfen und Hinzufügen der Spalte 'adresse'
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS locations (
@@ -47,8 +31,36 @@ db.serialize(() => {
       sonstiges TEXT,
       adresse TEXT
     )
-  `);
+  `, (err) => {
+    if (err) {
+      console.error('Fehler beim Erstellen der Tabelle:', err);
+    } else {
+      console.log('Tabelle erstellt oder existiert bereits.');
+    }
+  });
 });
+
+
+// Funktion zur Adressabfrage mit OpenStreetMap API
+async function fetchAddress(lat, lon) {
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    if (!response.ok) {
+      throw new Error(`OSM API Error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const { road, city, state, country, postcode } = data.address;
+    const formattedAddress = `${road}, ${city}, ${state}, ${country}, ${postcode}`;
+    return formattedAddress || 'Adresse nicht gefunden';
+  } catch (error) {
+    console.error("Fehler bei der Adressabfrage:", error);
+    return 'Adresse nicht gefunden';
+  }
+}
+
+
+
+
 
 
 // Home route (renders index.hbs)

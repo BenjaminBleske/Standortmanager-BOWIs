@@ -12,7 +12,8 @@ db.serialize(() => {
       erstellungsdatum TEXT,
       x_coord REAL,
       y_coord REAL,
-      sonstiges TEXT
+      sonstiges TEXT,
+      adresse TEXT
     )
   `);
 
