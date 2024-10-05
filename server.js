@@ -1,21 +1,15 @@
-/**
- * This is the main server script that provides the API endpoints
- * The script uses the database helper in /src
- * The endpoints retrieve, update, and return data to the page handlebars files
- *
- * The API returns the front-end UI handlebars pages, or
- * Raw json if the client requests it with a query parameter ?raw=json
- */
-
 // Utilities we need
 const fs = require("fs");
 const path = require("path");
 
 // Require the fastify framework and instantiate it
 const fastify = require("fastify")({
-  // Set this to true for detailed logging:
-  logger: false,
+  logger: true, // Set this to true for detailed logging
 });
+
+// Import SQLite3
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./locations.db');
 
 // Setup our static files
 fastify.register(require("@fastify/static"), {
@@ -33,155 +27,75 @@ fastify.register(require("@fastify/view"), {
   },
 });
 
-// Load and parse SEO data
-const seo = require("./src/seo.json");
-if (seo.url === "glitch-default") {
-  seo.url = `https://${process.env.PROJECT_DOMAIN}.glitch.me`;
-}
+// Create the database table if it doesn't exist
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS locations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bezirk TEXT,
+      erstellungsdatum TEXT,
+      x_coord REAL,
+      y_coord REAL,
+      sonstiges TEXT
+    )
+  `);
+});
 
-// We use a module for handling database operations in /src
-const data = require("./src/data.json");
-const db = require("./src/" + data.database);
-
-/**
- * Home route for the app
- *
- * Return the poll options from the database helper script
- * The home route may be called on remix in which case the db needs setup
- *
- * Client can request raw data using a query parameter
- */
+// Home route for the app (renders index.hbs)
 fastify.get("/", async (request, reply) => {
-  /* 
-  Params is the data we pass to the client
-  - SEO values for front-end UI but not for raw data
-  */
-  let params = request.query.raw ? {} : { seo: seo };
-
-  // Get the available choices from the database
-  const options = await db.getOptions();
-  if (options) {
-    params.optionNames = options.map((choice) => choice.language);
-    params.optionCounts = options.map((choice) => choice.picks);
-  }
-  // Let the user know if there was a db error
-  else params.error = data.errorMessage;
-
-  // Check in case the data is empty or not setup yet
-  if (options && params.optionNames.length < 1)
-    params.setup = data.setupMessage;
-
-  // ADD PARAMS FROM TODO HERE
-
-  // Send the page options or raw JSON data if the client requested it
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/index.hbs", params);
+  reply.view("/src/pages/index.hbs");
 });
 
-/**
- * Post route to process user vote
- *
- * Retrieve vote from body data
- * Send vote to database helper
- * Return updated list of votes
- */
-fastify.post("/", async (request, reply) => {
-  // We only send seo if the client is requesting the front-end ui
-  let params = request.query.raw ? {} : { seo: seo };
+// Save location data to the SQLite database
+fastify.post("/saveLocation", async (request, reply) => {
+  const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
 
-  // Flag to indicate we want to show the poll results instead of the poll form
-  params.results = true;
-  let options;
-
-  // We have a vote - send to the db helper to process and return results
-  if (request.body.language) {
-    options = await db.processVote(request.body.language);
-    if (options) {
-      // We send the choices and numbers in parallel arrays
-      params.optionNames = options.map((choice) => choice.language);
-      params.optionCounts = options.map((choice) => choice.picks);
+  // Insert the new location into the database
+  db.run(
+    `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
+    [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges],
+    function (err) {
+      if (err) {
+        reply.send({ status: "error", message: "Fehler beim Speichern des Standorts" });
+        return console.error(err.message);
+      }
+      reply.send({ status: "success", message: "Standort erfolgreich gespeichert!" });
     }
-  }
-  params.error = options ? null : data.errorMessage;
-
-  // Return the info to the client
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/index.hbs", params);
+  );
 });
 
-/**
- * Admin endpoint returns log of votes
- *
- * Send raw json or the admin handlebars page
- */
-fastify.get("/logs", async (request, reply) => {
-  let params = request.query.raw ? {} : { seo: seo };
-
-  // Get the log history from the db
-  params.optionHistory = await db.getLogs();
-
-  // Let the user know if there's an error
-  params.error = params.optionHistory ? null : data.errorMessage;
-
-  // Send the log list
-  return request.query.raw
-    ? reply.send(params)
-    : reply.view("/src/pages/admin.hbs", params);
+// Route to fetch the last 5 locations from the database
+fastify.get("/last-locations", (req, res) => {
+  db.all(`SELECT * FROM locations ORDER BY id DESC LIMIT 5`, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: 'Fehler beim Abrufen der Standorte' });
+      return;
+    }
+    res.json(rows);
+  });
 });
 
-/**
- * Admin endpoint to empty all logs
- *
- * Requires authorization (see setup instructions in README)
- * If auth fails, return a 401 and the log list
- * If auth is successful, empty the history
- */
-fastify.post("/reset", async (request, reply) => {
-  let params = request.query.raw ? {} : { seo: seo };
+// Route to download all locations as a CSV file
+fastify.get('/download-csv', (req, res) => {
+  db.all('SELECT * FROM locations', [], (err, rows) => {
+    if (err) {
+      res.status(500).send('Fehler beim Abrufen der Daten.');
+      return;
+    }
 
-  /* 
-  Authenticate the user request by checking against the env key variable
-  - make sure we have a key in the env and body, and that they match
-  */
-  if (
-    !request.body.key ||
-    request.body.key.length < 1 ||
-    !process.env.ADMIN_KEY ||
-    request.body.key !== process.env.ADMIN_KEY
-  ) {
-    console.error("Auth fail");
+    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
+    const csvContent = "ID,Bezirk,Erstellungsdatum,x_coord,y_coord,sonstiges\n" + csvData;
 
-    // Auth failed, return the log data plus a failed flag
-    params.failed = "You entered invalid credentials!";
-
-    // Get the log list
-    params.optionHistory = await db.getLogs();
-  } else {
-    // We have a valid key and can clear the log
-    params.optionHistory = await db.clearHistory();
-
-    // Check for errors - method would return false value
-    params.error = params.optionHistory ? null : data.errorMessage;
-  }
-
-  // Send a 401 if auth failed, 200 otherwise
-  const status = params.failed ? 401 : 200;
-  // Send an unauthorized status code if the user credentials failed
-  return request.query.raw
-    ? reply.status(status).send(params)
-    : reply.status(status).view("/src/pages/admin.hbs", params);
+    fs.writeFileSync('./public/locations.csv', csvContent);
+    res.download('./public/locations.csv');
+  });
 });
 
 // Run the server and report out to the logs
-fastify.listen(
-  { port: process.env.PORT, host: "0.0.0.0" },
-  function (err, address) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    console.log(`Your app is listening on ${address}`);
+fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, address) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
   }
-);
+  console.log(`Your app is listening on ${address}`);
+});
