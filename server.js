@@ -59,29 +59,25 @@ fastify.get("/", async (request, reply) => {
 // Save location data to the SQLite database
 fastify.post("/saveLocation", async (request, reply) => {
   try {
-    const { bezirk, x_coord, y_coord, sonstiges } = request.body;
+    const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
 
-    // Erstellungsdatum und Uhrzeit generieren
-    const erstellungsdatum = new Date().toISOString().split('T')[0];  // Nur das Datum
-    const erstellungszeit = new Date().toTimeString().split(' ')[0];  // Nur die Uhrzeit
+    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
 
-    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum, erstellungszeit });
-
-    if (!bezirk || !x_coord || !y_coord || !erstellungsdatum || !erstellungszeit) {
-      console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum, erstellungszeit });
+    if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
+      console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum });
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
-    // Insert the new location into the database using Promises
+    // Insert the new location into the database
     const result = await new Promise((resolve, reject) => {
       db.run(
-        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges, erstellungszeit) VALUES (?, ?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || '', erstellungszeit],
+        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
+        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
         function (err) {
           if (err) {
-            return reject(err);  // Promise rejected if an error occurs
+            return reject(err);  // Falls ein Fehler auftritt
           }
-          resolve(this.lastID); // Resolve with last inserted ID
+          resolve(this.lastID); // Rückgabe der letzten eingefügten ID
         }
       );
     });
@@ -94,6 +90,7 @@ fastify.post("/saveLocation", async (request, reply) => {
     return reply.code(500).send({ status: "error", message: "Interner Serverfehler beim Speichern des Standorts" });
   }
 });
+
 
 
 
