@@ -88,7 +88,6 @@ fastify.post("/saveLocation", async (request, reply) => {
 
 
 // Route to fetch the last 5 locations from the database
-// Route to fetch the last 5 locations from the database
 fastify.get("/last-locations", (req, reply) => {
   db.all(`SELECT * FROM locations ORDER BY id DESC LIMIT 5`, [], (err, rows) => {
     if (err) {
@@ -168,3 +167,59 @@ fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, addres
   }
   console.log(`Your app is listening on ${address}`);
 });
+
+// Route für die Admin-Seite
+fastify.get('/admin', async (request, reply) => {
+  const key = request.query.key; // Schlüssel aus der URL-Abfrage entnehmen
+
+  // Überprüfe, ob der Admin-Schlüssel korrekt ist
+  if (key !== process.env.ADMIN_KEY) {
+    return reply.view('/src/pages/admin.hbs', { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
+  }
+
+  // Holen der Standort-Daten aus der Datenbank
+  try {
+    const logs = await new Promise((resolve, reject) => {
+      db.all('SELECT * FROM locations ORDER BY id DESC', (err, rows) => {  // Alle Einträge holen
+        if (err) {
+          return reject(err);
+        }
+        resolve(rows);
+      });
+    });
+
+    // Rendere die Admin-Seite mit den abgerufenen Daten
+    return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Standorte:', error);
+    return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
+  }
+});
+
+// Route zum Löschen von Standorten
+fastify.post('/admin/delete', async (request, reply) => {
+  const { id, key } = request.body;  // ID des Standorts und Schlüssel aus dem Formular
+
+  // Überprüfe den Admin-Schlüssel
+  if (key !== process.env.ADMIN_KEY) {
+    return reply.view('/src/pages/admin.hbs', { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
+  }
+
+  // Lösche den Standort aus der Datenbank
+  try {
+    await new Promise((resolve, reject) => {
+      db.run('DELETE FROM locations WHERE id = ?', [id], (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+
+    return reply.redirect('/admin?key=' + key);  // Admin-Seite nach Löschen neu laden
+  } catch (error) {
+    console.error('Fehler beim Löschen des Standorts:', error);
+    return reply.code(500).send({ error: 'Fehler beim Löschen des Standorts' });
+  }
+});
+

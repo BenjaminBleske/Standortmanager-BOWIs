@@ -1,39 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin-Bereich</title>
-  <!-- Deine weiteren Head-Inhalte -->
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="wrapper">
     <div class="content" role="main">
-      <h1>Logs</h1>
+      <h1>Alle Standorte</h1>
 
-      {{#if error}}
-      <p class="error">{{error}}</p>
-      {{else}}
-      <p>Hier siehst du die letzten 20 Einträge.</p>
       {{#if optionHistory.length}}
       <table>
-        <tr>
-          <th>Option Name</th>
-          <th>Timestamp</th>
-        </tr>
-        {{#each optionHistory}}
-        <tr>
-          <td>{{choice}}</td>
-          <td>{{time}}</td>
-        </tr>
-        {{/each}}
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bezirk</th>
+            <th>x_coord</th>
+            <th>y_coord</th>
+            <th>Erstellungsdatum</th>
+            <th>Sonstiges</th>
+            <th>Aktion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each optionHistory}}
+          <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.bezirk}}</td>
+            <td>{{this.x_coord}}</td>
+            <td>{{this.y_coord}}</td>
+            <td>{{this.erstellungsdatum}}</td>  <!-- Erstellungsdatum mit Uhrzeit -->
+            <td>{{this.sonstiges}}</td>
+            <td>
+              <form action="/admin/delete" method="POST">
+                <input type="hidden" name="id" value="{{this.id}}">
+                <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+                <button type="submit">Löschen</button>
+              </form>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
       </table>
       {{else}}
-      <p class="error">Keine Einträge!</p>
-      {{/if}}
+      <p>Keine Standorte gefunden!</p>
       {{/if}}
 
-      <!-- Rückkehr-Link zur Index-Seite -->
       <a href="/">Zurück zur Startseite</a>
     </div>
   </div>
