@@ -102,24 +102,26 @@
             const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
 
             if (coordinates) {
-               const data = {
-                  bezirk: bezirk,
-                  x_coord: coordinates.lon,
-                  y_coord: coordinates.lat,
-                  sonstiges: 'Weitere Informationen',
-                  erstellungsdatum: new Date().toISOString().split(' ')[0]  // Datum und Zeit
-                };
+         const data = {
+                bezirk: bezirk,
+                x_coord: coordinates.lon,
+                y_coord: coordinates.lat,
+                sonstiges: 'Weitere Informationen',
+                erstellungsdatum: new Date().toISOString().split('T')[0],  // Nur das Datum
+                erstellungszeit: new Date().toISOString().split('T')[1].split('.')[0]  // Nur die Zeit
+            };
 
-                fetch('/saveLocation', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                  alert(result.message);
-                  loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
-                });
+            fetch('/saveLocation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+                loadLastLocations();  // Aktualisiere die letzten 5 Standorte
+            });
+
 
             } else {
                 alert('Bitte einen gültigen Link eingeben.');

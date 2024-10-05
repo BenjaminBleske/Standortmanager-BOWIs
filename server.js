@@ -36,13 +36,14 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bezirk TEXT,
       erstellungsdatum TEXT,
-      erstellungszeit TEXT,
+      erstellungszeit TEXT,  
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT
     )
   `);
 });
+
 
 
 
@@ -60,24 +61,25 @@ fastify.get("/", async (request, reply) => {
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
+    const erstellungszeit = new Date().toISOString().split('T')[1].split('.')[0]; // Uhrzeit hinzufügen
 
-    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
+    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum, erstellungszeit });
 
     if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
       console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum });
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
-    // Insert the new location into the database
+    // Insert the new location into the database using Promises
     const result = await new Promise((resolve, reject) => {
       db.run(
-        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
+        `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?, ?)`,
+        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || ''],
         function (err) {
           if (err) {
-            return reject(err);  // Falls ein Fehler auftritt
+            return reject(err);  // Promise rejected if an error occurs
           }
-          resolve(this.lastID); // Rückgabe der letzten eingefügten ID
+          resolve(this.lastID); // Resolve with last inserted ID
         }
       );
     });
@@ -127,7 +129,7 @@ fastify.get('/download-csv', async (request, reply) => {
       return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
-    // Convert the rows to CSV format
+    // Convert the rows to CSV format with erstellungszeit
     const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
     const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges\n" + csvData;
 
@@ -141,6 +143,8 @@ fastify.get('/download-csv', async (request, reply) => {
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
 });
+
+
 
 
 

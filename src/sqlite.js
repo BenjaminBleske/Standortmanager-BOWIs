@@ -16,13 +16,14 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bezirk TEXT,
       erstellungsdatum TEXT,
+      erstellungszeit TEXT,  -- Diese Spalte hinzufügen
       x_coord REAL,
       y_coord REAL,
-      sonstiges TEXT,
-      erstellungszeit TEXT
+      sonstiges TEXT
     )
   `);
 });
+
 
 // Our server script will call these methods to connect to the db
 module.exports = {
@@ -39,13 +40,14 @@ module.exports = {
           `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges, erstellungszeit) VALUES (?, ?, ?, ?, ?, ?)`,
           [locationData.bezirk, locationData.erstellungsdatum, locationData.x_coord, locationData.y_coord, locationData.sonstiges, locationData.erstellungszeit],
           function (err) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve({ id: this.lastID });
-            }
-          }
-        );
+              if (err) {
+                  reject(err);
+              } else {
+                  resolve({ id: this.lastID });
+        }
+    }
+);
+
       });
     } catch (dbError) {
       console.error(dbError);
