@@ -53,53 +53,61 @@
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-        // Extrahiert die Koordinaten aus einem Google Maps Link
-        function extractCoordinates(googleMapsLink) {
-            console.log("Google Maps Link received:", googleMapsLink);
+       // Extrahiert die Koordinaten aus einem Google Maps Link
+    function extractCoordinates(googleMapsLink) {
+        console.log("Google Maps Link received:", googleMapsLink);
 
-            let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-            let matchQ = googleMapsLink.match(regexQ);
-            if (matchQ) {
-                console.log("Extracted coordinates from q= link:", matchQ);
-                return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-            }
-
-            let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-            let matchAt = googleMapsLink.match(regexAt);
-            if (matchAt) {
-                console.log("Extracted coordinates from @ link:", matchAt);
-                return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-            }
-
-            console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
-            return null;
+        let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+        let matchQ = googleMapsLink.match(regexQ);
+        if (matchQ) {
+            console.log("Extracted coordinates from q= link:", matchQ);
+            return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
         }
 
-        // Globale Variable für die kleine Karte
-        let smallMap;
+        let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+        let matchAt = googleMapsLink.match(regexAt);
+        if (matchAt) {
+            console.log("Extracted coordinates from @ link:", matchAt);
+            return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+        }
 
-        // EventListener für den Test-Button
-        document.getElementById('testButton').addEventListener('click', function() {
-            const googleLink = document.getElementById('googleLink').value;
-            const coordinates = extractCoordinates(googleLink);
+        console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
+        return null;
+    }
 
-            if (coordinates) {
-                if (typeof smallMap !== "undefined" && smallMap !== null) {
-                    smallMap.remove();  // Entfernt die bestehende Karte
-                }
+    // Globale Variable für die kleine Karte
+    let smallMap;
 
-                smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+    // EventListener für den Test-Button
+    document.getElementById('testButton').addEventListener('click', function() {
+        const googleLink = document.getElementById('googleLink').value;
+        const coordinates = extractCoordinates(googleLink);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(smallMap);
-
-                L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
-                    .bindPopup('Standort bestätigt').openPopup();
-            } else {
-                alert('Ungültiger Google Maps Link');
+        if (coordinates) {
+            if (typeof smallMap !== "undefined" && smallMap !== null) {
+                smallMap.remove();  // Entfernt die bestehende Karte
             }
-        });
+
+            smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(smallMap);
+
+            // Aktuelle Uhrzeit holen
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const currentTime = `${hours}:${minutes}:${seconds}`;
+
+            // Popup mit "Standort bestätigt" und der aktuellen Uhrzeit anzeigen
+            L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
+                .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+        } else {
+            alert('Ungültiger Google Maps Link');
+        }
+    });
 
         // EventListener für den Schreiben-Button (Speicherung in der Datenbank)
    
@@ -135,10 +143,10 @@
 
      
     // Funktion, um die aktuelle Uhrzeit anzuzeigen und jede Sekunde zu aktualisieren
-    function updateCurrentTime() {
+ function updateCurrentTime() {
         const currentTimeElement = document.getElementById('currentTime');
         setInterval(() => {
-            const now = new Date(new Date().getTime() + 2 * 60 * 60 * 1000);  // Zeit um 2 Stunden vorverlegen
+            const now = new Date();  // Verwende die lokale Zeit ohne manuelle Verschiebung
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
