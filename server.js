@@ -71,6 +71,7 @@ fastify.get("/", async (request, reply) => {
 
 
 // Save location to the database including the specific parts of the address
+// Save location to the database including the specific parts of the address
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
@@ -87,23 +88,41 @@ fastify.post("/saveLocation", async (request, reply) => {
         .send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
-    // Adresse von OpenStreetMap API abrufen
-    const adresse = await fetchAddress(y_coord, x_coord);
-    const adressTeile = adresse.split(','); // Teilt die Adresse in Teile
+    // Adresse von OpenStreetMap API abrufen und zerlegen
+    const adresse = await fetchAddress(y_coord, x_coord); // Holt die gesamte Adresse von OSM
 
-    // Wähle den ersten, zweiten, dritten und vorletzten Teil
-    const gewuenschteTeile = [
-      adressTeile[0], // erster Teil
-      adressTeile[1], // zweiter Teil
-      adressTeile[2], // dritter Teil
-      adressTeile[adressTeile.length - 2] // vorletzter Teil
-    ].join(', '); // Teile zusammenfügen
+    // Zerlegen der Adresse in spezifische Teile
+    const addressParts = adresse.split(','); // Zerlegt den Adress-String in Teile
+    const hausnummer = addressParts[0] || ''; // Hausnummer
+    const strasse = addressParts[1] || ''; // Straße
+    const bezirk_spez = addressParts[2] || ''; // Spezifischer Bezirk
+    const ort = addressParts[3] || ''; // Ort
+    const bundesland = addressParts[4] || ''; // Bundesland
+    const plz = addressParts[5] || ''; // Postleitzahl
+    const land = addressParts[6] || ''; // Land
 
-    // Standort in die Datenbank einfügen
+    // Standort in die Datenbank einfügen, speichere die separaten Adressteile
     const result = await new Promise((resolve, reject) => {
       db.run(
-        `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges, adresse) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || '', gewuenschteTeile], // Speichern der gewünschten Teile der Adresse
+        `INSERT INTO locations 
+        (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges, adresse, hausnummer, strasse, bezirk_spez, ort, bundesland, plz, land) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          bezirk, 
+          erstellungsdatum, 
+          erstellungszeit, 
+          x_coord, 
+          y_coord, 
+          sonstiges || '', 
+          adresse, 
+          hausnummer, 
+          strasse, 
+          bezirk_spez, 
+          ort, 
+          bundesland, 
+          plz, 
+          land
+        ],
         function (err) {
           if (err) reject(err);
           resolve(this.lastID);
@@ -121,6 +140,8 @@ fastify.post("/saveLocation", async (request, reply) => {
       .send({ status: "error", message: "Interner Serverfehler" });
   }
 });
+
+
 
 
 
