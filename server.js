@@ -47,34 +47,55 @@ fastify.get("/", async (request, reply) => {
 });
 
 
+
+// Save location data to the SQLite database
 // Save location data to the SQLite database
 fastify.post("/saveLocation", async (request, reply) => {
-  const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
+  try {
+    const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
 
-  // Insert the new location into the database
-  db.run(
-    `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
-    [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges],
-    function (err) {
-      if (err) {
-        reply.send({ status: "error", message: "Fehler beim Speichern des Standorts" });
-        return console.error(err.message);
-      }
-      reply.send({ status: "success", message: "Standort erfolgreich gespeichert!" });
+    // Logging the request body to debug input data
+    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
+
+    // Basic validation to ensure required fields are provided
+    if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
+      console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum });
+      return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
-  );
+
+    // Insert the new location into the database
+    db.run(
+      `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
+      [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
+      function (err) {
+        if (err) {
+          console.error("Fehler beim Speichern des Standorts:", err.message);
+          return reply.code(500).send({ status: "error", message: "Fehler beim Speichern des Standorts" });
+        }
+        // Send success response with the inserted location ID
+        console.log("Location successfully saved:", { id: this.lastID });
+        return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!" });
+      }
+    );
+  } catch (err) {
+    console.error("Fehler beim Speichern des Standorts:", err);
+    return reply.code(500).send({ status: "error", message: "Interner Serverfehler beim Speichern des Standorts" });
+  }
 });
+
+
 
 // Route to fetch the last 5 locations from the database
-fastify.get("/last-locations", (req, res) => {
+// Route to fetch the last 5 locations from the database
+fastify.get("/last-locations", (req, reply) => {
   db.all(`SELECT * FROM locations ORDER BY id DESC LIMIT 5`, [], (err, rows) => {
     if (err) {
-      res.status(500).json({ error: 'Fehler beim Abrufen der Standorte' });
-      return;
+      return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
     }
-    res.json(rows);
+    return reply.send(rows); // Korrekt in Fastify
   });
 });
+
 
 // Route to download all locations as a CSV file
 fastify.get('/download-csv', (req, res) => {
