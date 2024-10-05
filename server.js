@@ -40,18 +40,19 @@ db.serialize(() => {
   });
 });
 
-
 // Funktion zur Adressabfrage mit OpenStreetMap API
 async function fetchAddress(lat, lon) {
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+      headers: {
+        'User-Agent': 'YourAppName/1.0 (your.email@example.com)' // Füge hier deinen User-Agent hinzu
+      }
+    });
     if (!response.ok) {
       throw new Error(`OSM API Error: ${response.statusText}`);
     }
     const data = await response.json();
-    const { road, city, state, country, postcode } = data.address;
-    const formattedAddress = `${road}, ${city}, ${state}, ${country}, ${postcode}`;
-    return formattedAddress || 'Adresse nicht gefunden';
+    return data.display_name || 'Adresse nicht gefunden';
   } catch (error) {
     console.error("Fehler bei der Adressabfrage:", error);
     return 'Adresse nicht gefunden';
@@ -68,7 +69,8 @@ fastify.get("/", async (request, reply) => {
   return reply.view("/src/pages/index.hbs");
 });
 
-// Save location to the database including the address
+
+// Save location to the database including the specific parts of the address
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
@@ -86,13 +88,22 @@ fastify.post("/saveLocation", async (request, reply) => {
     }
 
     // Adresse von OpenStreetMap API abrufen
-    const adresse = await fetchAddress(y_coord, x_coord); // y_coord ist die Breite (lat), x_coord ist die Länge (lon)
+    const adresse = await fetchAddress(y_coord, x_coord);
+    const adressTeile = adresse.split(','); // Teilt die Adresse in Teile
+
+    // Wähle den ersten, zweiten, dritten und vorletzten Teil
+    const gewuenschteTeile = [
+      adressTeile[0], // erster Teil
+      adressTeile[1], // zweiter Teil
+      adressTeile[2], // dritter Teil
+      adressTeile[adressTeile.length - 2] // vorletzter Teil
+    ].join(', '); // Teile zusammenfügen
 
     // Standort in die Datenbank einfügen
     const result = await new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges, adresse) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || '', adresse],
+        [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || '', gewuenschteTeile], // Speichern der gewünschten Teile der Adresse
         function (err) {
           if (err) reject(err);
           resolve(this.lastID);
@@ -110,6 +121,9 @@ fastify.post("/saveLocation", async (request, reply) => {
       .send({ status: "error", message: "Interner Serverfehler" });
   }
 });
+
+
+
 
 
 
