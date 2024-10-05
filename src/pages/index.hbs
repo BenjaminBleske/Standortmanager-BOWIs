@@ -14,6 +14,7 @@
 </head>
 <body>
     <h1>Google Maps Standort Manager</h1>
+  
 
     <!-- Google Maps Link Eingabe -->
     <label for="googleLink">Google Maps Link:</label>
@@ -38,6 +39,7 @@
     <!-- CSV-Download -->
     <h3>CSV-Datei herunterladen</h3>
     <a href="/download-csv" download>CSV herunterladen</a>
+  <a href="/admin">Zum Admin-Bereich</a>
 
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
@@ -46,27 +48,29 @@
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
         // Extrahiert die Koordinaten aus einem Google Maps Link
-  function extractCoordinates(googleMapsLink) {
-  // Versuche, den einfacheren "q="-Link zu parsen
-  let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-  let matchQ = googleMapsLink.match(regexQ);
-  if (matchQ) {
-    return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-  }
+        function extractCoordinates(googleMapsLink) {
+            console.log("Google Maps Link received:", googleMapsLink);
 
-  // Versuche, den komplexeren "@"-Link zu parsen
-  let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-  let matchAt = googleMapsLink.match(regexAt);
-  if (matchAt) {
-    return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-  }
+            let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+            let matchQ = googleMapsLink.match(regexQ);
+            if (matchQ) {
+                console.log("Extracted coordinates from q= link:", matchQ);
+                return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
+            }
 
-  // Wenn nichts gefunden wurde, gib null zurück
-  console.error("Fehler beim Extrahieren der Koordinaten. Linkformat wird nicht unterstützt:", googleMapsLink);
-  return null;
-}
+            let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            let matchAt = googleMapsLink.match(regexAt);
+            if (matchAt) {
+                console.log("Extracted coordinates from @ link:", matchAt);
+                return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+            }
 
+            console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
+            return null;
+        }
 
+        // Globale Variable für die kleine Karte
+        let smallMap;
 
         // EventListener für den Test-Button
         document.getElementById('testButton').addEventListener('click', function() {
@@ -74,13 +78,17 @@
             const coordinates = extractCoordinates(googleLink);
 
             if (coordinates) {
-                const map = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+                if (typeof smallMap !== "undefined" && smallMap !== null) {
+                    smallMap.remove();  // Entfernt die bestehende Karte
+                }
+
+                smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                }).addTo(smallMap);
 
-                L.marker([coordinates.lat, coordinates.lon]).addTo(map)
+                L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
                     .bindPopup('Standort bestätigt').openPopup();
             } else {
                 alert('Ungültiger Google Maps Link');
@@ -147,6 +155,7 @@
 
         // Rufe die letzten 5 Standorte beim Laden der Seite ab
         loadLastLocations();
+      
     </script>
 </body>
 </html>

@@ -49,40 +49,40 @@ fastify.get("/", async (request, reply) => {
 
 
 // Save location data to the SQLite database
-// Save location data to the SQLite database
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
 
-    // Logging the request body to debug input data
     console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
 
-    // Basic validation to ensure required fields are provided
     if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
       console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum });
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
-    // Insert the new location into the database
-    db.run(
-      `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
-      [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
-      function (err) {
-        if (err) {
-          console.error("Fehler beim Speichern des Standorts:", err.message);
-          // Hier ist der Fehler: Wir müssen "return reply.send()" aufrufen und beenden
-          return reply.code(500).send({ status: "error", message: "Fehler beim Speichern des Standorts" });
+    // Insert the new location into the database using Promises
+    const result = await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
+        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
+        function (err) {
+          if (err) {
+            return reject(err);  // Promise rejected if an error occurs
+          }
+          resolve(this.lastID); // Resolve with last inserted ID
         }
-        // Stelle sicher, dass nur eine Antwort gesendet wird
-        console.log("Location successfully saved:", { id: this.lastID });
-        return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!" });
-      }
-    );
+      );
+    });
+
+    console.log("Location successfully saved:", { id: result });
+    return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!", id: result });
+
   } catch (err) {
     console.error("Fehler beim Speichern des Standorts:", err);
     return reply.code(500).send({ status: "error", message: "Interner Serverfehler beim Speichern des Standorts" });
   }
 });
+
 
 
 
