@@ -1,4 +1,13 @@
-{{#if optionHistory}}
+{{#if error}}
+  <p class="error">{{error}}</p>
+{{/if}}
+
+{{#if showPasswordForm}}
+  <form action="/admin/login" method="POST">
+    <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+    <button type="submit">Login</button>
+  </form>
+{{else}}
   <table>
     <thead>
       <tr>
@@ -19,8 +28,8 @@
           <td>{{this.bezirk}}</td>
           <td>{{this.x_coord}}</td>
           <td>{{this.y_coord}}</td>
-          <td>{{this.erstellungsdatum}}</td> <!-- Erstellungsdatum -->
-          <td>{{this.erstellungszeit}}</td> <!-- Uhrzeit -->
+          <td>{{this.erstellungsdatum}}</td>
+          <td>{{this.erstellungszeit}}</td>
           <td>{{this.sonstiges}}</td>
           <td>
             <form action="/admin/delete" method="POST">
@@ -33,6 +42,4 @@
       {{/each}}
     </tbody>
   </table>
-{{else}}
-  <p>Keine Standorte gefunden!</p>
 {{/if}}

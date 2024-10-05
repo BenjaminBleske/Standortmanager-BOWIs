@@ -16,30 +16,35 @@
     <h1>Google Maps Standort Manager</h1>
   
 
-    <!-- Google Maps Link Eingabe -->
-    <label for="googleLink">Google Maps Link:</label>
-    <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
+   <!-- Google Maps Link Eingabe -->
+<label for="googleLink">Google Maps Link:</label>
+<input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
 
-    <!-- Testen-Knopf zur Anzeige auf kleiner Leaflet-Karte -->
-    <button id="testButton">Testen</button>
-    
-    <!-- Kleinere Karte zur Vorschau des Standorts -->
-    <div id="smallMap" style="width: 300px; height: 200px;"></div>
+<!-- Testen-Knopf zur Anzeige auf kleiner Leaflet-Karte -->
+<button id="testButton">Testen</button>
 
-    <!-- Vorauswahl des Bezirks -->
-    <h3>Bezirk auswählen</h3>
-    <label for="bezirk">Bezirk:</label>
-    <input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen
-    <input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
-    <input type="radio" id="sued" name="bezirk" value="Süd"> Süd
+<!-- Kleinere Karte zur Vorschau des Standorts -->
+<div id="smallMap" style="width: 300px; height: 200px;"></div>
 
-    <!-- Schreiben-Knopf zur Übermittlung an die Datenbank -->
-    <button id="writeButton">Schreiben</button>
+<!-- Neues Textfeld für "Sonstiges" -->
+<label for="sonstiges">Sonstiges (optional):</label>
+<input type="text" id="sonstiges" placeholder="optional" />
 
-    <!-- CSV-Download -->
-    <h3>CSV-Datei herunterladen</h3>
-    <a href="/download-csv" download>CSV herunterladen</a>
-  <a href="/admin">Zum Admin-Bereich</a>
+<!-- Vorauswahl des Bezirks -->
+<h3>Bezirk auswählen</h3>
+<label for="bezirk">Bezirk:</label>
+<input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen
+<input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
+<input type="radio" id="sued" name="bezirk" value="Süd"> Süd
+
+<!-- Schreiben-Knopf zur Übermittlung an die Datenbank -->
+<button id="writeButton">Schreiben</button>
+
+<!-- CSV-Download -->
+<h3>CSV-Datei herunterladen</h3>
+<a href="/download-csv" download>CSV herunterladen</a>
+<a href="/admin">Zum Admin-Bereich</a>
+
 
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
@@ -96,37 +101,37 @@
         });
 
         // EventListener für den Schreiben-Button (Speicherung in der Datenbank)
+   
         document.getElementById('writeButton').addEventListener('click', function() {
             const googleLink = document.getElementById('googleLink').value;
             const coordinates = extractCoordinates(googleLink);
             const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
+            const sonstiges = document.getElementById('sonstiges').value;  // Sonstiges eingeben
 
             if (coordinates) {
-         const data = {
-                bezirk: bezirk,
-                x_coord: coordinates.lon,
-                y_coord: coordinates.lat,
-                sonstiges: 'Weitere Informationen',
-                erstellungsdatum: new Date().toISOString().split('T')[0],  // Nur das Datum
-                erstellungszeit: new Date().toISOString().split('T')[1].split('.')[0]  // Nur die Zeit
-            };
+                const data = {
+                    bezirk: bezirk,
+                    x_coord: coordinates.lon,
+                    y_coord: coordinates.lat,
+                    sonstiges: sonstiges || '',  // Falls leer, wird ein leerer String gesendet
+                    erstellungsdatum: new Date().toISOString().split('T')[0]
+                };
 
-            fetch('/saveLocation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                alert(result.message);
-                loadLastLocations();  // Aktualisiere die letzten 5 Standorte
-            });
-
-
+                fetch('/saveLocation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    alert(result.message);
+                    loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
+                });
             } else {
                 alert('Bitte einen gültigen Link eingeben.');
             }
         });
+
 
         // Funktion zum Abrufen der letzten 5 Standorte
         function loadLastLocations() {
