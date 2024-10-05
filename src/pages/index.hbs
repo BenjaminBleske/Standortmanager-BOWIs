@@ -46,14 +46,32 @@
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
         // Extrahiert die Koordinaten aus einem Google Maps Link
-        function extractCoordinates(googleMapsLink) {
-            const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-            const match = googleMapsLink.match(regex);
-            if (match) {
-                return { lat: parseFloat(match[1]), lon: parseFloat(match[2]) };
-            }
-            return null;
-        }
+     function extractCoordinates(googleMapsLink) {
+  // Versuche, den einfacheren "q="-Link zu parsen
+  let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+  let matchQ = googleMapsLink.match(regexQ);
+  if (matchQ) {
+    return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
+  }
+
+  // Versuche, den komplexeren "@"-Link zu parsen
+  let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+  let matchAt = googleMapsLink.match(regexAt);
+  if (matchAt) {
+    return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+  }
+
+  // Wenn nichts gefunden wurde, gib null zurück
+  return null;
+}
+
+// Beispielnutzung
+const link1 = "https://www.google.com/maps?q=51.57643127441406,6.893294334411621&z=17&hl=de";
+const link2 = "https://www.google.com/maps/place/51°34'35.2%22N+6°53'35.9%22E/@51.5764313,6.8907194,925m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d51.5764313!4d6.8932943?hl=de&entry=ttu&g_ep=EgoyMDI0MTAwMi4xIKXMDSoASAFQAw%3D%3D";
+
+console.log(extractCoordinates(link1)); // { lat: 51.57643127441406, lon: 6.893294334411621 }
+console.log(extractCoordinates(link2)); // { lat: 51.5764313, lon: 6.8907194 }
+
 
         // EventListener für den Test-Button
         document.getElementById('testButton').addEventListener('click', function() {

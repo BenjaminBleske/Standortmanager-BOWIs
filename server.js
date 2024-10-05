@@ -70,9 +70,10 @@ fastify.post("/saveLocation", async (request, reply) => {
       function (err) {
         if (err) {
           console.error("Fehler beim Speichern des Standorts:", err.message);
+          // Hier ist der Fehler: Wir müssen "return reply.send()" aufrufen und beenden
           return reply.code(500).send({ status: "error", message: "Fehler beim Speichern des Standorts" });
         }
-        // Send success response with the inserted location ID
+        // Stelle sicher, dass nur eine Antwort gesendet wird
         console.log("Location successfully saved:", { id: this.lastID });
         return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!" });
       }
@@ -82,6 +83,7 @@ fastify.post("/saveLocation", async (request, reply) => {
     return reply.code(500).send({ status: "error", message: "Interner Serverfehler beim Speichern des Standorts" });
   }
 });
+
 
 
 
