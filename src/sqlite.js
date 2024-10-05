@@ -1,64 +1,75 @@
-/**
- * Module handles database management for location data
- *
- * Server API calls the methods in here to query and update the SQLite database
- */
-
 // Utilities we need
 const sqlite3 = require("sqlite3").verbose();
 const dbFile = "./locations.db"; // Path to the database file
 const db = new sqlite3.Database(dbFile);
 
-// Ensure the database and table exist
+
+// Ensure the database and table exist, and add 'erstellungszeit' column if necessary
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS locations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bezirk TEXT,
       erstellungsdatum TEXT,
-      erstellungszeit TEXT,  -- Diese Spalte hinzufügen
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT
     )
   `);
+
+  // Prüfe, ob die Spalte 'erstellungszeit' existiert, und füge sie hinzu, falls sie fehlt
+  db.all("PRAGMA table_info(locations);", (err, columns) => {
+    if (err) {
+      console.error("Error checking table structure:", err);
+      return;
+    }
+
+    // Überprüfe, ob 'columns' tatsächlich ein Array ist
+    if (Array.isArray(columns)) {
+      const hasErstellungszeit = columns.some(col => col.name === 'erstellungszeit');
+      
+      if (!hasErstellungszeit) {
+        db.run("ALTER TABLE locations ADD COLUMN erstellungszeit TEXT", (err) => {
+          if (err) {
+            console.error("Fehler beim Hinzufügen der Spalte 'erstellungszeit':", err.message);
+          } else {
+            console.log("Spalte 'erstellungszeit' erfolgreich hinzugefügt.");
+          }
+        });
+      } else {
+        console.log("Spalte 'erstellungszeit' ist bereits vorhanden.");
+      }
+    } else {
+      console.error("Die Abfrage 'PRAGMA table_info' hat keine gültigen Daten zurückgegeben.");
+    }
+  });
 });
 
 
-// Our server script will call these methods to connect to the db
-module.exports = {
 
-  /**
-   * Save a new location to the database
-   *
-   * @param {Object} locationData - Contains the data to be saved (bezirk, x_coord, y_coord, sonstiges, erstellungsdatum, erstellungszeit)
-   */
+
+// Export the database methods as needed
+module.exports = {
   saveLocation: async (locationData) => {
     try {
       return await new Promise((resolve, reject) => {
         db.run(
-          `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges, erstellungszeit) VALUES (?, ?, ?, ?, ?, ?)`,
-          [locationData.bezirk, locationData.erstellungsdatum, locationData.x_coord, locationData.y_coord, locationData.sonstiges, locationData.erstellungszeit],
+          `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?, ?)`,
+          [locationData.bezirk, locationData.erstellungsdatum, locationData.erstellungszeit, locationData.x_coord, locationData.y_coord, locationData.sonstiges],
           function (err) {
-              if (err) {
-                  reject(err);
-              } else {
-                  resolve({ id: this.lastID });
-        }
-    }
-);
-
+            if (err) {
+              reject(err);
+            } else {
+              resolve({ id: this.lastID });
+            }
+          }
+        );
       });
     } catch (dbError) {
       console.error(dbError);
     }
   },
 
-  /**
-   * Get the last 5 locations from the database
-   *
-   * Returns an array of the most recent 5 locations ordered by ID
-   */
   getLastLocations: async () => {
     try {
       return await new Promise((resolve, reject) => {
@@ -75,11 +86,6 @@ module.exports = {
     }
   },
 
-  /**
-   * Export all locations as CSV
-   *
-   * Returns all the data from the locations table
-   */
   getAllLocations: async () => {
     try {
       return await new Promise((resolve, reject) => {

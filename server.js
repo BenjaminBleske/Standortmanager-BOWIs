@@ -28,21 +28,48 @@ fastify.register(require("@fastify/view"), {
 });
 
 
-
-// Create the database table if it doesn't exist
+// Ensure the database and table exist, and add 'erstellungszeit' column if necessary
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS locations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bezirk TEXT,
       erstellungsdatum TEXT,
-      erstellungszeit TEXT,  
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT
     )
   `);
+
+  // Prüfe, ob die Spalte 'erstellungszeit' existiert, und füge sie hinzu, falls sie fehlt
+  db.all("PRAGMA table_info(locations);", (err, columns) => {
+    if (err) {
+      console.error("Error checking table structure:", err);
+      return;
+    }
+
+    // Überprüfe, ob 'columns' tatsächlich ein Array ist
+    if (Array.isArray(columns)) {
+      const hasErstellungszeit = columns.some(col => col.name === 'erstellungszeit');
+      
+      if (!hasErstellungszeit) {
+        db.run("ALTER TABLE locations ADD COLUMN erstellungszeit TEXT", (err) => {
+          if (err) {
+            console.error("Fehler beim Hinzufügen der Spalte 'erstellungszeit':", err.message);
+          } else {
+            console.log("Spalte 'erstellungszeit' erfolgreich hinzugefügt.");
+          }
+        });
+      } else {
+        console.log("Spalte 'erstellungszeit' ist bereits vorhanden.");
+      }
+    } else {
+      console.error("Die Abfrage 'PRAGMA table_info' hat keine gültigen Daten zurückgegeben.");
+    }
+  });
 });
+
+
 
 
 
@@ -92,6 +119,7 @@ fastify.post("/saveLocation", async (request, reply) => {
     return reply.code(500).send({ status: "error", message: "Interner Serverfehler beim Speichern des Standorts" });
   }
 });
+
 
 
 
