@@ -1,8 +1,7 @@
-// Utilities we need
 const sqlite3 = require("sqlite3").verbose();
 const dbFile = "./locations.db"; // Path to the database file
 const db = new sqlite3.Database(dbFile);
-
+const fetch = require('node-fetch');
 
 // Ensure the database and table exist, and add 'erstellungszeit' and 'adresse' columns if necessary
 db.serialize(() => {
@@ -17,51 +16,48 @@ db.serialize(() => {
     )
   `);
 
-  // Prüfe, ob die Spalte 'erstellungszeit' und 'adresse' existieren, und füge sie hinzu, falls sie fehlen
+  // Prüfe, ob die Spalten 'erstellungszeit' und 'adresse' existieren, und füge sie hinzu, falls sie fehlen
   db.all("PRAGMA table_info(locations);", (err, columns) => {
     if (err) {
       console.error("Error checking table structure:", err);
       return;
     }
 
-    if (Array.isArray(columns)) {
-      const hasErstellungszeit = columns.some(col => col.name === 'erstellungszeit');
-      const hasAdresse = columns.some(col => col.name === 'adresse');
-
-      // Füge die Spalte 'erstellungszeit' hinzu, wenn sie fehlt
-      if (!hasErstellungszeit) {
-        db.run("ALTER TABLE locations ADD COLUMN erstellungszeit TEXT", (err) => {
-          if (err) {
-            console.error("Fehler beim Hinzufügen der Spalte 'erstellungszeit':", err.message);
-          } else {
-            console.log("Spalte 'erstellungszeit' erfolgreich hinzugefügt.");
-          }
-        });
-      }
-
-      // Füge die Spalte 'adresse' hinzu, wenn sie fehlt
-      if (!hasAdresse) {
-        db.run("ALTER TABLE locations ADD COLUMN adresse TEXT", (err) => {
-          if (err) {
-            console.error("Fehler beim Hinzufügen der Spalte 'adresse':", err.message);
-          } else {
-            console.log("Spalte 'adresse' erfolgreich hinzugefügt.");
-          }
-        });
-      }
+    // Überprüfen, ob 'erstellungszeit' vorhanden ist
+    const hasErstellungszeit = columns.some(col => col.name === 'erstellungszeit');
+    if (!hasErstellungszeit) {
+      console.log("Spalte 'erstellungszeit' fehlt. Füge sie hinzu...");
+      db.run("ALTER TABLE locations ADD COLUMN erstellungszeit TEXT", (err) => {
+        if (err) {
+          console.error("Fehler beim Hinzufügen der Spalte 'erstellungszeit':", err.message);
+        } else {
+          console.log("Spalte 'erstellungszeit' erfolgreich hinzugefügt.");
+        }
+      });
     } else {
-      console.error("Die Abfrage 'PRAGMA table_info' hat keine gültigen Daten zurückgegeben.");
+      console.log("Spalte 'erstellungszeit' ist bereits vorhanden.");
+    }
+
+    // Überprüfen, ob 'adresse' vorhanden ist
+    const hasAdresse = columns.some(col => col.name === 'adresse');
+    if (!hasAdresse) {
+      console.log("Spalte 'adresse' fehlt. Füge sie hinzu...");
+      db.run("ALTER TABLE locations ADD COLUMN adresse TEXT", (err) => {
+        if (err) {
+          console.error("Fehler beim Hinzufügen der Spalte 'adresse':", err.message);
+        } else {
+          console.log("Spalte 'adresse' erfolgreich hinzugefügt.");
+        }
+      });
+    } else {
+      console.log("Spalte 'adresse' ist bereits vorhanden.");
     }
   });
 });
 
-
-
-
-
 // Export the database methods as needed
 module.exports = {
-saveLocation: async (locationData) => {
+  saveLocation: async (locationData) => {
     try {
       return await new Promise((resolve, reject) => {
         db.run(
@@ -80,7 +76,6 @@ saveLocation: async (locationData) => {
       console.error(dbError);
     }
   },
-
 
   getLastLocations: async () => {
     try {

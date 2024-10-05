@@ -3,6 +3,8 @@ const path = require("path");
 const fastify = require("fastify")({ logger: true });
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("./locations.db");
+const fetch = require('node-fetch');
+
 
 fastify.register(require("@fastify/static"), {
   root: path.join(__dirname, "public"),
@@ -43,7 +45,7 @@ db.serialize(() => {
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT,
-      adresse TEXT  -- Neue Spalte für die Adresse
+      adresse TEXT
     )
   `);
 });
@@ -58,40 +60,45 @@ fastify.get("/", async (request, reply) => {
 fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
-    
+
+    // Zeit um 2 Stunden vorverlegen (UTC+2)
+    const erstellungszeit = new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[1]
+      .split(".")[0];
+
     if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
-      return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
+      return reply
+        .status(400)
+        .send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
-    // Adresse basierend auf den Koordinaten abrufen
-    console.log("Adresse wird abgerufen für:", y_coord, x_coord);
-    const adresse = await fetchAddress(y_coord, x_coord);
-    console.log("Adresse erfolgreich abgerufen:", adresse);
+    // Adresse von OpenStreetMap API abrufen
+    const adresse = await fetchAddress(y_coord, x_coord); // y_coord ist die Breite (lat), x_coord ist die Länge (lon)
 
-    const erstellungszeit = new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString().split('T')[1].split('.')[0]; // Uhrzeit hinzufügen
-
+    // Standort in die Datenbank einfügen
     const result = await new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO locations (bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges, adresse) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [bezirk, erstellungsdatum, erstellungszeit, x_coord, y_coord, sonstiges || '', adresse],
         function (err) {
-          if (err) {
-            console.error("Fehler beim Schreiben in die Datenbank:", err);
-            reject(err);
-          } else {
-            console.log("Datensatz erfolgreich gespeichert:", this.lastID);
-            resolve(this.lastID);
-          }
+          if (err) reject(err);
+          resolve(this.lastID);
         }
       );
     });
 
-    return reply.code(200).send({ status: "success", message: "Standort erfolgreich gespeichert!", id: result });
+    return reply
+      .code(200)
+      .send({ status: "success", message: "Standort erfolgreich gespeichert!", id: result });
   } catch (err) {
     console.error("Fehler in /saveLocation:", err);
-    return reply.code(500).send({ status: "error", message: "Interner Serverfehler" });
+    return reply
+      .code(500)
+      .send({ status: "error", message: "Interner Serverfehler" });
   }
 });
+
 
 
 
