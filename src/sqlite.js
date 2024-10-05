@@ -3,8 +3,7 @@ const dbFile = "./locations.db"; // Path to the database file
 const db = new sqlite3.Database(dbFile);
 const fetch = require('node-fetch');
 
-// Ensure the database and table exist, and add 'erstellungszeit' and 'adresse' columns if necessary
-
+// Sicherstellen, dass die Tabelle mit allen erforderlichen Spalten existiert
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS locations (
@@ -24,18 +23,25 @@ db.serialize(() => {
       plz TEXT,
       land TEXT
     )
-  `);
-  
-  // Prüfen, ob die neuen Adress-Spalten existieren und sie gegebenenfalls hinzufügen
+  `, (err) => {
+    if (err) {
+      console.error('Fehler beim Erstellen der Tabelle:', err);
+    } else {
+      console.log('Tabelle erstellt oder existiert bereits.');
+    }
+  });
+
+  // Überprüfen, ob alle Spalten vorhanden sind (falls noch nicht hinzugefügt)
+  const columnsToCheck = ['hausnummer', 'strasse', 'bezirk_spez', 'ort', 'bundesland', 'plz', 'land'];
   db.all("PRAGMA table_info(locations);", (err, columns) => {
     if (err) {
-      console.error("Error checking table structure:", err);
+      console.error("Fehler beim Überprüfen der Tabellenstruktur:", err);
       return;
     }
 
-    const columnsToCheck = ['hausnummer', 'strasse', 'bezirk_spez', 'ort', 'bundesland', 'plz', 'land'];
     columnsToCheck.forEach(col => {
-      if (!columns.some(column => column.name === col)) {
+      const columnExists = columns.some(column => column.name === col);
+      if (!columnExists) {
         db.run(`ALTER TABLE locations ADD COLUMN ${col} TEXT`, (err) => {
           if (err) {
             console.error(`Fehler beim Hinzufügen der Spalte '${col}':`, err.message);
@@ -43,13 +49,14 @@ db.serialize(() => {
             console.log(`Spalte '${col}' erfolgreich hinzugefügt.`);
           }
         });
+      } else {
+        console.log(`Spalte '${col}' ist bereits vorhanden.`);
       }
     });
   });
 });
 
-
-// Export the database methods as needed
+// Export der benötigten Datenbankmethoden
 module.exports = {
   saveLocation: async (locationData) => {
     try {
@@ -88,7 +95,6 @@ module.exports = {
     }
   },
 
-  // Diese Funktion bleibt unverändert
   getLastLocations: async () => {
     try {
       return await new Promise((resolve, reject) => {
@@ -105,7 +111,6 @@ module.exports = {
     }
   },
 
-  // Diese Funktion bleibt ebenfalls unverändert
   getAllLocations: async () => {
     try {
       return await new Promise((resolve, reject) => {
