@@ -27,6 +27,8 @@ fastify.register(require("@fastify/view"), {
   },
 });
 
+
+
 // Create the database table if it doesn't exist
 db.serialize(() => {
   db.run(`
@@ -41,6 +43,8 @@ db.serialize(() => {
   `);
 });
 
+
+
 // Home route for the app (renders index.hbs)
 fastify.get("/", async (request, reply) => {
   return reply.view("/src/pages/index.hbs");
@@ -48,10 +52,15 @@ fastify.get("/", async (request, reply) => {
 
 
 
+
+
 // Save location data to the SQLite database
 fastify.post("/saveLocation", async (request, reply) => {
   try {
-    const { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum } = request.body;
+    const { bezirk, x_coord, y_coord, sonstiges } = request.body;
+
+    // Erstellungsdatum und Uhrzeit im Format 'YYYY-MM-DD HH:MM:SS'
+    const erstellungsdatum = new Date().toISOString().replace('T', ' ').split('.')[0];
 
     console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
 
@@ -87,6 +96,8 @@ fastify.post("/saveLocation", async (request, reply) => {
 
 
 
+
+
 // Route to fetch the last 5 locations from the database
 fastify.get("/last-locations", (req, reply) => {
   db.all(`SELECT * FROM locations ORDER BY id DESC LIMIT 5`, [], (err, rows) => {
@@ -101,13 +112,13 @@ fastify.get("/last-locations", (req, reply) => {
 // Route to download all locations as a CSV file
 fastify.get('/download-csv', async (request, reply) => {
   try {
-    // Fetch all locations from the database
+    // Alle Standorte aus der Datenbank abrufen
     const rows = await new Promise((resolve, reject) => {
       db.all('SELECT * FROM locations', [], (err, rows) => {
         if (err) {
-          return reject(err); // Reject if there's an error
+          return reject(err); // Bei Fehler ablehnen
         }
-        resolve(rows); // Resolve with rows if successful
+        resolve(rows); // Daten zurückgeben, wenn erfolgreich
       });
     });
 
@@ -115,14 +126,14 @@ fastify.get('/download-csv', async (request, reply) => {
       return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
-    // Convert the rows to CSV format
+    // Konvertiere die Daten in CSV-Format, inkl. Uhrzeit
     const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
     const csvContent = "ID,Bezirk,Erstellungsdatum,x_coord,y_coord,sonstiges\n" + csvData;
 
-    // Set the response type to CSV
+    // Setze den Antworttyp auf CSV
     reply.header('Content-Type', 'text/csv');
     reply.header('Content-Disposition', 'attachment; filename="locations.csv"');
-    return reply.send(csvContent); // Send the CSV data
+    return reply.send(csvContent); // CSV-Daten zurückgeben
 
   } catch (err) {
     console.error("Fehler beim Abrufen der CSV-Daten:", err);
@@ -131,9 +142,14 @@ fastify.get('/download-csv', async (request, reply) => {
 });
 
 
+
+
+
 // Route to clear all location logs with admin key authentication
 fastify.post("/reset", async (request, reply) => {
   const { key } = request.body;
+  
+  
 
   // Validate Admin Key (from environment variables)
   if (!key || key !== process.env.ADMIN_KEY) {
@@ -159,6 +175,7 @@ fastify.post("/reset", async (request, reply) => {
   }
 });
 
+
 // Run the server and report out to the logs
 fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) {
@@ -167,6 +184,8 @@ fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, addres
   }
   console.log(`Your app is listening on ${address}`);
 });
+
+
 
 // Route für die Admin-Seite
 fastify.get('/admin', async (request, reply) => {
@@ -177,24 +196,30 @@ fastify.get('/admin', async (request, reply) => {
     return reply.view('/src/pages/admin.hbs', { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
   }
 
-  // Holen der Standort-Daten aus der Datenbank
   try {
+    // Standort-Daten aus der Datenbank holen
     const logs = await new Promise((resolve, reject) => {
-      db.all('SELECT * FROM locations ORDER BY id DESC', (err, rows) => {  // Alle Einträge holen
+      db.all('SELECT * FROM locations ORDER BY id DESC', (err, rows) => {
         if (err) {
-          return reject(err);
+          return reject(err);  // Fehlerbehandlung
         }
-        resolve(rows);
+        resolve(rows);  // Daten zurückgeben
       });
     });
 
-    // Rendere die Admin-Seite mit den abgerufenen Daten
-    return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
+    // Prüfe, ob Daten vorhanden sind, und rendere die Admin-Seite
+    if (logs && logs.length > 0) {
+      return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
+    } else {
+      return reply.view('/src/pages/admin.hbs', { error: "Keine Daten gefunden." });
+    }
   } catch (error) {
     console.error('Fehler beim Abrufen der Standorte:', error);
     return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
   }
 });
+
+
 
 // Route zum Löschen von Standorten
 fastify.post('/admin/delete', async (request, reply) => {
@@ -204,6 +229,8 @@ fastify.post('/admin/delete', async (request, reply) => {
   if (key !== process.env.ADMIN_KEY) {
     return reply.view('/src/pages/admin.hbs', { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
   }
+  
+  
 
   // Lösche den Standort aus der Datenbank
   try {
