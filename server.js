@@ -43,8 +43,9 @@ db.serialize(() => {
 
 // Home route for the app (renders index.hbs)
 fastify.get("/", async (request, reply) => {
-  reply.view("/src/pages/index.hbs");
+  return reply.view("/src/pages/index.hbs");
 });
+
 
 // Save location data to the SQLite database
 fastify.post("/saveLocation", async (request, reply) => {
@@ -89,6 +90,34 @@ fastify.get('/download-csv', (req, res) => {
     fs.writeFileSync('./public/locations.csv', csvContent);
     res.download('./public/locations.csv');
   });
+});
+
+// Route to clear all location logs with admin key authentication
+fastify.post("/reset", async (request, reply) => {
+  const { key } = request.body;
+
+  // Validate Admin Key (from environment variables)
+  if (!key || key !== process.env.ADMIN_KEY) {
+    return reply.status(401).view("/src/pages/admin.hbs", { failed: "Ungültiger Admin-Schlüssel!" });
+  }
+
+  // If Admin Key is valid, clear the locations table
+  try {
+    await new Promise((resolve, reject) => {
+      db.run("DELETE FROM locations", (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    return reply.view("/src/pages/admin.hbs", { success: "Standort-Logs erfolgreich gelöscht!" });
+
+  } catch (err) {
+    console.error("Fehler beim Löschen der Standort-Logs:", err);
+    return reply.status(500).view("/src/pages/admin.hbs", { error: "Fehler beim Löschen der Standort-Logs" });
+  }
 });
 
 // Run the server and report out to the logs
