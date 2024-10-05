@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Standort-Manager</title>
+    <title>CDU Standort-Manager</title>
 
     <!-- Leaflet CSS und JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -13,182 +13,195 @@
     <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-    <h1>Google Maps Standort Manager</h1>
+    <h1>CDU Bottrop Standort Manager für Google Maps-Kartenlinks</h1>
   
+    <!-- Google Maps Link Eingabe -->
+    <label for="googleLink">Google Maps Link:</label>
+    <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
 
-   <!-- Google Maps Link Eingabe -->
-<label for="googleLink">Google Maps Link:</label>
-<input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
+    <!-- Aktuelle Uhrzeit für die kleine Karte -->
+    <p id="currentTimeSmallMap"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit über der kleinen Karte -->
 
-<!-- Testen-Knopf zur Anzeige auf kleiner Leaflet-Karte -->
-<button id="testButton">Testen</button>
+    <!-- Testen-Knopf zur Anzeige auf kleiner Leaflet-Karte -->
+    <button id="testButton">Testen</button>
 
-<!-- Kleinere Karte zur Vorschau des Standorts -->
-<div id="smallMap" style="width: 300px; height: 200px;"></div>
+    <!-- Kleinere Karte zur Vorschau des Standorts -->
+    <div id="smallMap" style="width: 300px; height: 200px;"></div>
 
-<!-- Neues Textfeld für "Sonstiges" -->
-<label for="sonstiges">Sonstiges (optional):</label>
-<input type="text" id="sonstiges" placeholder="optional" />
+    <!-- Neues Textfeld für "Sonstiges" -->
+    <label for="sonstiges">Sonstiges (optional):</label>
+    <input type="text" id="sonstiges" placeholder="optional" />
 
-<!-- Vorauswahl des Bezirks -->
-<h3>Bezirk auswählen</h3>
-<label for="bezirk">Bezirk:</label>
-<input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen
-<input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
-<input type="radio" id="sued" name="bezirk" value="Süd"> Süd
+    <!-- Vorauswahl des Bezirks -->
+    <h3>Bezirk auswählen</h3>
+    <label for="bezirk">Bezirk:</label>
+    <input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen
+    <input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
+    <input type="radio" id="sued" name="bezirk" value="Süd"> Süd
 
-<!-- Schreiben-Knopf zur Übermittlung an die Datenbank -->
-<button id="writeButton">Schreiben</button>
+    <!-- Schreiben-Knopf zur Übermittlung an die Datenbank -->
+    <button id="writeButton">Schreiben</button>
 
-<!-- CSV-Download -->
-<h3>CSV-Datei herunterladen</h3>
-<a href="/download-csv" download>CSV herunterladen</a>
-<a href="/admin">Zum Admin-Bereich</a>
-
+    <!-- CSV-Download -->
+    <h3>CSV-Datei herunterladen</h3>
+    <a href="/download-csv" download>CSV herunterladen</a>
+    <a href="/admin">Zum Admin-Bereich</a>
 
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
-  <p id="currentTime"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit -->
+    <p id="currentTime"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit über den letzten 5 Standorten -->
     <div id="lastLocations"></div> <!-- Hier werden die Mini-Maps angezeigt -->
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-       // Extrahiert die Koordinaten aus einem Google Maps Link
-    function extractCoordinates(googleMapsLink) {
-        console.log("Google Maps Link received:", googleMapsLink);
+        // Extrahiert die Koordinaten aus einem Google Maps Link
+        function extractCoordinates(googleMapsLink) {
+            console.log("Google Maps Link received:", googleMapsLink);
 
-        let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-        let matchQ = googleMapsLink.match(regexQ);
-        if (matchQ) {
-            console.log("Extracted coordinates from q= link:", matchQ);
-            return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-        }
-
-        let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-        let matchAt = googleMapsLink.match(regexAt);
-        if (matchAt) {
-            console.log("Extracted coordinates from @ link:", matchAt);
-            return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-        }
-
-        console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
-        return null;
-    }
-
-    // Globale Variable für die kleine Karte
-    let smallMap;
-
-    // EventListener für den Test-Button
-    document.getElementById('testButton').addEventListener('click', function() {
-        const googleLink = document.getElementById('googleLink').value;
-        const coordinates = extractCoordinates(googleLink);
-
-        if (coordinates) {
-            if (typeof smallMap !== "undefined" && smallMap !== null) {
-                smallMap.remove();  // Entfernt die bestehende Karte
+            let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+            let matchQ = googleMapsLink.match(regexQ);
+            if (matchQ) {
+                console.log("Extracted coordinates from q= link:", matchQ);
+                return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
             }
 
-            smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+            let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            let matchAt = googleMapsLink.match(regexAt);
+            if (matchAt) {
+                console.log("Extracted coordinates from @ link:", matchAt);
+                return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+            }
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(smallMap);
-
-            // Aktuelle Uhrzeit holen
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            const currentTime = `${hours}:${minutes}:${seconds}`;
-
-            // Popup mit "Standort bestätigt" und der aktuellen Uhrzeit anzeigen
-            L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
-                .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
-        } else {
-            alert('Ungültiger Google Maps Link');
+            console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
+            return null;
         }
-    });
 
-        // EventListener für den Schreiben-Button (Speicherung in der Datenbank)
-   
-        document.getElementById('writeButton').addEventListener('click', function() {
+        // Globale Variable für die kleine Karte
+        let smallMap;
+
+        // EventListener für den Test-Button
+        document.getElementById('testButton').addEventListener('click', function() {
             const googleLink = document.getElementById('googleLink').value;
             const coordinates = extractCoordinates(googleLink);
-            const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
-            const sonstiges = document.getElementById('sonstiges').value;  // Sonstiges eingeben
 
             if (coordinates) {
-                const data = {
-                    bezirk: bezirk,
-                    x_coord: coordinates.lon,
-                    y_coord: coordinates.lat,
-                    sonstiges: sonstiges || '',  // Falls leer, wird ein leerer String gesendet
-                    erstellungsdatum: new Date().toISOString().split('T')[0]
-                };
+                if (typeof smallMap !== "undefined" && smallMap !== null) {
+                    smallMap.remove();  // Entfernt die bestehende Karte
+                }
 
-                fetch('/saveLocation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    alert(result.message);
-                    loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
-                });
-            } else {
-                alert('Bitte einen gültigen Link eingeben.');
-            }
-        });
-
-     
-    // Funktion, um die aktuelle Uhrzeit anzuzeigen und jede Sekunde zu aktualisieren
- function updateCurrentTime() {
-        const currentTimeElement = document.getElementById('currentTime');
-        setInterval(() => {
-            const now = new Date();  // Verwende die lokale Zeit ohne manuelle Verschiebung
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            currentTimeElement.innerText = `Aktuelle Uhrzeit: ${hours}:${minutes}:${seconds}`;
-        }, 1000); // Aktualisierung alle 1000 Millisekunden (1 Sekunde)
-    }
-
-        // Funktion zum Abrufen der letzten 5 Standorte
-     // Funktion zum Abrufen der letzten 5 Standorte
-function loadLastLocations() {
-    fetch('/last-locations')
-        .then(response => response.json())
-        .then(locations => {
-            const container = document.getElementById('lastLocations');
-            container.innerHTML = ''; // Lösche alte Mini-Maps
-
-            locations.forEach((location, index) => {
-                const mapDiv = document.createElement('div');
-                mapDiv.id = `map-${index}`;
-                mapDiv.style.width = '200px';
-                mapDiv.style.height = '150px';
-                mapDiv.style.marginBottom = '20px';
-                container.appendChild(mapDiv);
-
-                const map = L.map(`map-${index}`).setView([location.y_coord, location.x_coord], 14);
+                smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                }).addTo(smallMap);
 
-                L.marker([location.y_coord, location.x_coord]).addTo(map)
-                    // Popup zeigt jetzt die Uhrzeit statt den Bezirk
-                    .bindPopup(`Uhrzeit: ${location.erstellungszeit}`).openPopup();
-            });
+                // Aktuelle Uhrzeit holen
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                const currentTime = `${hours}:${minutes}:${seconds}`;
+
+                // Popup mit "Standort bestätigt" und der aktuellen Uhrzeit anzeigen
+                L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
+                    .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+            } else {
+                alert('Ungültiger Google Maps Link');
+            }
         });
-}
 
+        // Funktion, um die aktuelle Uhrzeit an zwei Stellen anzuzeigen
+        function updateCurrentTime() {
+            setInterval(() => {
+                const now = new Date();  // Verwende die lokale Zeit ohne manuelle Verschiebung
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                
+                // Aktualisiere die Uhrzeit für die kleine Karte
+                const currentTimeElementSmallMap = document.getElementById('currentTimeSmallMap');
+                if (currentTimeElementSmallMap) {
+                    currentTimeElementSmallMap.innerText = `Aktuelle Uhrzeit: ${hours}:${minutes}:${seconds}`;
+                }
+
+                // Aktualisiere die Uhrzeit für die letzten 5 Standorte
+                const currentTimeElement = document.getElementById('currentTime');
+                if (currentTimeElement) {
+                    currentTimeElement.innerText = `Aktuelle Uhrzeit: ${hours}:${minutes}:${seconds}`;
+                }
+            }, 1000); // Aktualisierung alle 1000 Millisekunden (1 Sekunde)
+        }
+      
+      document.getElementById('writeButton').addEventListener('click', function() {
+    const googleLink = document.getElementById('googleLink').value;
+    const coordinates = extractCoordinates(googleLink);
+    const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
+    const sonstiges = document.getElementById('sonstiges').value;  // Sonstiges eingeben
+
+    if (coordinates) {
+        const data = {
+            bezirk: bezirk,
+            x_coord: coordinates.lon,
+            y_coord: coordinates.lat,
+            sonstiges: sonstiges || '',  // Falls leer, wird ein leerer String gesendet
+            erstellungsdatum: new Date().toISOString().split('T')[0]  // Datum
+        };
+
+        console.log("Sending data to server:", data); // Debugging
+
+        fetch('/saveLocation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            alert(result.message);
+            loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Fehler beim Speichern des Standorts.');
+        });
+    } else {
+        alert('Bitte einen gültigen Google Maps Link eingeben.');
+    }
+});
+
+
+        // Funktion zum Abrufen der letzten 5 Standorte
+        function loadLastLocations() {
+            fetch('/last-locations')
+                .then(response => response.json())
+                .then(locations => {
+                    const container = document.getElementById('lastLocations');
+                    container.innerHTML = ''; // Lösche alte Mini-Maps
+
+                    locations.forEach((location, index) => {
+                        const mapDiv = document.createElement('div');
+                        mapDiv.id = `map-${index}`;
+                        mapDiv.style.width = '200px';
+                        mapDiv.style.height = '150px';
+                        mapDiv.style.marginBottom = '20px';
+                        container.appendChild(mapDiv);
+
+                        const map = L.map(`map-${index}`).setView([location.y_coord, location.x_coord], 14);
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        L.marker([location.y_coord, location.x_coord]).addTo(map)
+                            // Popup zeigt jetzt die Uhrzeit statt den Bezirk
+                            .bindPopup(`Uhrzeit: ${location.erstellungszeit}`).openPopup();
+                    });
+                });
+        }
 
         // Rufe die letzten 5 Standorte beim Laden der Seite ab
         loadLastLocations();
-      updateCurrentTime();  // Aktualisiert die Uhrzeit im Frontend
-      
+        updateCurrentTime();  // Aktualisiert die Uhrzeit im Frontend an beiden Stellen
+
     </script>
 </body>
 </html>
