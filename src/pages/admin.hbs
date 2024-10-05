@@ -1,38 +1,52 @@
-{{#if optionHistory.length}}
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Bezirk</th>
-        <th>x_coord</th>
-        <th>y_coord</th>
-        <th>Erstellungsdatum</th>
-        <th>Uhrzeit</th>
-        <th>Sonstiges</th>
-        <th>Aktion</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#each optionHistory}}
-        <tr>
-          <td>{{this.id}}</td>
-          <td>{{this.bezirk}}</td>
-          <td>{{this.x_coord}}</td>
-          <td>{{this.y_coord}}</td>
-          <td>{{this.date}}</td> <!-- Datum -->
-          <td>{{this.time}}</td> <!-- Uhrzeit -->
-          <td>{{this.sonstiges}}</td>
-          <td>
-            <form action="/admin/delete" method="POST">
-              <input type="hidden" name="id" value="{{this.id}}">
-              <input type="password" name="key" placeholder="Admin-Schlüssel" required>
-              <button type="submit">Löschen</button>
-            </form>
-          </td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
+{{#if error}}
+  <p class="error">{{error}}</p>
+{{/if}}
+
+{{#if showPasswordForm}}
+  <!-- Admin Password Form -->
+  <form action="/admin/login" method="POST">
+    <p>Gib den Admin-Schlüssel ein:</p>
+    <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+    <button type="submit">Anmelden</button>
+  </form>
 {{else}}
-  <p>Keine Standorte gefunden!</p>
+  <!-- Wenn Passwort korrekt, zeige die Standort-Logs -->
+  {{#if optionHistory.length}}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Bezirk</th>
+          <th>x_coord</th>
+          <th>y_coord</th>
+          <th>Erstellungsdatum</th>
+          <th>Uhrzeit</th>
+          <th>Sonstiges</th>
+          <th>Aktion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each optionHistory}}
+          <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.bezirk}}</td>
+            <td>{{this.x_coord}}</td>
+            <td>{{this.y_coord}}</td>
+            <td>{{this.date}}</td> <!-- Datum -->
+            <td>{{this.time}}</td> <!-- Uhrzeit -->
+            <td>{{this.sonstiges}}</td>
+            <td>
+              <form action="/admin/delete" method="POST">
+                <input type="hidden" name="id" value="{{this.id}}">
+                <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+                <button type="submit">Löschen</button>
+              </form>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    <p>Keine Standorte gefunden!</p>
+  {{/if}}
 {{/if}}

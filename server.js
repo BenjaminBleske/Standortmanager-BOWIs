@@ -221,9 +221,14 @@ fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, addres
 
 
 
-// Route für die Admin-Seite
+// Route für die Admin-Seite, mit Passwortüberprüfung per Formular
 fastify.get('/admin', async (request, reply) => {
-  const key = request.query.key; // Schlüssel aus der URL-Abfrage entnehmen
+  return reply.view('/src/pages/admin.hbs', { showPasswordForm: true });
+});
+
+// Route zur Admin-Login-Überprüfung
+fastify.post('/admin/login', async (request, reply) => {
+  const { key } = request.body;
 
   // Überprüfe, ob der Admin-Schlüssel korrekt ist
   if (key !== process.env.ADMIN_KEY) {
@@ -235,36 +240,31 @@ fastify.get('/admin', async (request, reply) => {
     const logs = await new Promise((resolve, reject) => {
       db.all('SELECT id, bezirk, erstellungsdatum, x_coord, y_coord, sonstiges FROM locations ORDER BY id DESC', (err, rows) => {
         if (err) {
-          console.error('Fehler bei der Datenbankabfrage:', err);
           return reject(err);
         }
 
-        console.log('Abgerufene Standort-Daten:', rows);  // Debug-Ausgabe der abgerufenen Daten
-
-        // Datum und Uhrzeit aufteilen
+        // Datum und Uhrzeit trennen
         const formattedRows = rows.map(row => {
-          const [date, time] = row.erstellungsdatum.split(' ');  // Datum und Uhrzeit aufteilen
+          const [date, time] = row.erstellungsdatum.split(' ');
           return {
             ...row,
-            date,   // Datum
-            time    // Uhrzeit
+            date,
+            time
           };
         });
+
         resolve(formattedRows);
       });
     });
 
-    if (logs.length > 0) {
-      console.log('Logs an Template übergeben:', logs);  // Debug-Ausgabe der an das Template übergebenen Daten
-      return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
-    } else {
-      return reply.view('/src/pages/admin.hbs', { error: "Keine Standorte gefunden!" });
-    }
+    // Seite rendern, nachdem das Passwort korrekt war
+    return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
+
   } catch (error) {
-    console.error('Fehler beim Abrufen der Standorte:', error);
     return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
   }
 });
+
 
 
 
