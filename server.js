@@ -36,12 +36,14 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bezirk TEXT,
       erstellungsdatum TEXT,
+      erstellungszeit TEXT,
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT
     )
   `);
 });
+
 
 
 
@@ -59,21 +61,22 @@ fastify.post("/saveLocation", async (request, reply) => {
   try {
     const { bezirk, x_coord, y_coord, sonstiges } = request.body;
 
-    // Erstellungsdatum und Uhrzeit im Format 'YYYY-MM-DD HH:MM:SS'
-    const erstellungsdatum = new Date().toISOString().replace('T', ' ').split('.')[0];
+    // Erstellungsdatum und Uhrzeit generieren
+    const erstellungsdatum = new Date().toISOString().split('T')[0];  // Nur das Datum
+    const erstellungszeit = new Date().toTimeString().split(' ')[0];  // Nur die Uhrzeit
 
-    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum });
+    console.log("Received data:", { bezirk, x_coord, y_coord, sonstiges, erstellungsdatum, erstellungszeit });
 
-    if (!bezirk || !x_coord || !y_coord || !erstellungsdatum) {
-      console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum });
+    if (!bezirk || !x_coord || !y_coord || !erstellungsdatum || !erstellungszeit) {
+      console.error("Fehlende erforderliche Felder:", { bezirk, x_coord, y_coord, erstellungsdatum, erstellungszeit });
       return reply.status(400).send({ status: "error", message: "Fehlende erforderliche Felder" });
     }
 
     // Insert the new location into the database using Promises
     const result = await new Promise((resolve, reject) => {
       db.run(
-        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
-        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || ''],
+        `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges, erstellungszeit) VALUES (?, ?, ?, ?, ?, ?)`,
+        [bezirk, erstellungsdatum, x_coord, y_coord, sonstiges || '', erstellungszeit],
         function (err) {
           if (err) {
             return reject(err);  // Promise rejected if an error occurs
@@ -98,6 +101,7 @@ fastify.post("/saveLocation", async (request, reply) => {
 
 
 
+
 // Route to fetch the last 5 locations from the database
 fastify.get("/last-locations", (req, reply) => {
   db.all(`SELECT * FROM locations ORDER BY id DESC LIMIT 5`, [], (err, rows) => {
@@ -112,13 +116,13 @@ fastify.get("/last-locations", (req, reply) => {
 // Route to download all locations as a CSV file
 fastify.get('/download-csv', async (request, reply) => {
   try {
-    // Alle Standorte aus der Datenbank abrufen
+    // Fetch all locations from the database
     const rows = await new Promise((resolve, reject) => {
       db.all('SELECT * FROM locations', [], (err, rows) => {
         if (err) {
-          return reject(err); // Bei Fehler ablehnen
+          return reject(err); // Reject if there's an error
         }
-        resolve(rows); // Daten zurückgeben, wenn erfolgreich
+        resolve(rows); // Resolve with rows if successful
       });
     });
 
@@ -126,20 +130,21 @@ fastify.get('/download-csv', async (request, reply) => {
       return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
-    // Konvertiere die Daten in CSV-Format, inkl. Uhrzeit
-    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
-    const csvContent = "ID,Bezirk,Erstellungsdatum,x_coord,y_coord,sonstiges\n" + csvData;
+    // Convert the rows to CSV format
+    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
+    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges\n" + csvData;
 
-    // Setze den Antworttyp auf CSV
+    // Set the response type to CSV
     reply.header('Content-Type', 'text/csv');
     reply.header('Content-Disposition', 'attachment; filename="locations.csv"');
-    return reply.send(csvContent); // CSV-Daten zurückgeben
+    return reply.send(csvContent); // Send the CSV data
 
   } catch (err) {
     console.error("Fehler beim Abrufen der CSV-Daten:", err);
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
 });
+
 
 
 
@@ -199,25 +204,41 @@ fastify.get('/admin', async (request, reply) => {
   try {
     // Standort-Daten aus der Datenbank holen
     const logs = await new Promise((resolve, reject) => {
-      db.all('SELECT * FROM locations ORDER BY id DESC', (err, rows) => {
+      db.all('SELECT id, bezirk, erstellungsdatum, x_coord, y_coord, sonstiges FROM locations ORDER BY id DESC', (err, rows) => {
         if (err) {
-          return reject(err);  // Fehlerbehandlung
+          console.error('Fehler bei der Datenbankabfrage:', err);
+          return reject(err);
         }
-        resolve(rows);  // Daten zurückgeben
+
+        console.log('Abgerufene Standort-Daten:', rows);  // Debug-Ausgabe der abgerufenen Daten
+
+        // Datum und Uhrzeit aufteilen
+        const formattedRows = rows.map(row => {
+          const [date, time] = row.erstellungsdatum.split(' ');  // Datum und Uhrzeit aufteilen
+          return {
+            ...row,
+            date,   // Datum
+            time    // Uhrzeit
+          };
+        });
+        resolve(formattedRows);
       });
     });
 
-    // Prüfe, ob Daten vorhanden sind, und rendere die Admin-Seite
-    if (logs && logs.length > 0) {
+    if (logs.length > 0) {
+      console.log('Logs an Template übergeben:', logs);  // Debug-Ausgabe der an das Template übergebenen Daten
       return reply.view('/src/pages/admin.hbs', { optionHistory: logs });
     } else {
-      return reply.view('/src/pages/admin.hbs', { error: "Keine Daten gefunden." });
+      return reply.view('/src/pages/admin.hbs', { error: "Keine Standorte gefunden!" });
     }
   } catch (error) {
     console.error('Fehler beim Abrufen der Standorte:', error);
     return reply.code(500).send({ error: 'Fehler beim Abrufen der Standorte' });
   }
 });
+
+
+
 
 
 

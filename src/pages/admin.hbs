@@ -6,7 +6,8 @@
         <th>Bezirk</th>
         <th>x_coord</th>
         <th>y_coord</th>
-        <th>Erstellungsdatum</th> <!-- Hier wird Datum und Uhrzeit angezeigt -->
+        <th>Erstellungsdatum</th>
+        <th>Uhrzeit</th>
         <th>Sonstiges</th>
         <th>Aktion</th>
       </tr>
@@ -18,7 +19,8 @@
           <td>{{this.bezirk}}</td>
           <td>{{this.x_coord}}</td>
           <td>{{this.y_coord}}</td>
-          <td>{{this.erstellungsdatum}}</td> <!-- Datum und Uhrzeit -->
+          <td>{{this.date}}</td> <!-- Datum -->
+          <td>{{this.time}}</td> <!-- Uhrzeit -->
           <td>{{this.sonstiges}}</td>
           <td>
             <form action="/admin/delete" method="POST">

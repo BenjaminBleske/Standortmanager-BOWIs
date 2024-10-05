@@ -26,18 +26,18 @@ db.serialize(() => {
 
 // Our server script will call these methods to connect to the db
 module.exports = {
-  
+
   /**
    * Save a new location to the database
    *
-   * @param {Object} locationData - Contains the data to be saved (bezirk, x_coord, y_coord, sonstiges, erstellungsdatum)
+   * @param {Object} locationData - Contains the data to be saved (bezirk, x_coord, y_coord, sonstiges, erstellungsdatum, erstellungszeit)
    */
   saveLocation: async (locationData) => {
     try {
       return await new Promise((resolve, reject) => {
         db.run(
-          `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges) VALUES (?, ?, ?, ?, ?)`,
-          [locationData.bezirk, locationData.erstellungsdatum, locationData.x_coord, locationData.y_coord, locationData.sonstiges],
+          `INSERT INTO locations (bezirk, erstellungsdatum, x_coord, y_coord, sonstiges, erstellungszeit) VALUES (?, ?, ?, ?, ?, ?)`,
+          [locationData.bezirk, locationData.erstellungsdatum, locationData.x_coord, locationData.y_coord, locationData.sonstiges, locationData.erstellungszeit],
           function (err) {
             if (err) {
               reject(err);
