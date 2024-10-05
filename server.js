@@ -100,20 +100,37 @@ fastify.get("/last-locations", (req, reply) => {
 
 
 // Route to download all locations as a CSV file
-fastify.get('/download-csv', (req, res) => {
-  db.all('SELECT * FROM locations', [], (err, rows) => {
-    if (err) {
-      res.status(500).send('Fehler beim Abrufen der Daten.');
-      return;
+fastify.get('/download-csv', async (request, reply) => {
+  try {
+    // Fetch all locations from the database
+    const rows = await new Promise((resolve, reject) => {
+      db.all('SELECT * FROM locations', [], (err, rows) => {
+        if (err) {
+          return reject(err); // Reject if there's an error
+        }
+        resolve(rows); // Resolve with rows if successful
+      });
+    });
+
+    if (!rows.length) {
+      return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
+    // Convert the rows to CSV format
     const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.x_coord},${row.y_coord},${row.sonstiges}`).join('\n');
     const csvContent = "ID,Bezirk,Erstellungsdatum,x_coord,y_coord,sonstiges\n" + csvData;
 
-    fs.writeFileSync('./public/locations.csv', csvContent);
-    res.download('./public/locations.csv');
-  });
+    // Set the response type to CSV
+    reply.header('Content-Type', 'text/csv');
+    reply.header('Content-Disposition', 'attachment; filename="locations.csv"');
+    return reply.send(csvContent); // Send the CSV data
+
+  } catch (err) {
+    console.error("Fehler beim Abrufen der CSV-Daten:", err);
+    return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
+  }
 });
+
 
 // Route to clear all location logs with admin key authentication
 fastify.post("/reset", async (request, reply) => {
