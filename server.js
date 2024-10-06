@@ -29,7 +29,14 @@ db.serialize(() => {
       x_coord REAL,
       y_coord REAL,
       sonstiges TEXT,
-      adresse TEXT
+      adresse TEXT,
+      hausnummer TEXT,
+      strasse TEXT,
+      bezirk_spez TEXT,
+      ort TEXT,
+      bundesland TEXT,
+      plz TEXT,
+      land TEXT
     )
   `, (err) => {
     if (err) {
@@ -39,6 +46,7 @@ db.serialize(() => {
     }
   });
 });
+
 
 // Funktion zur Adressabfrage mit OpenStreetMap API
 async function fetchAddress(lat, lon) {
