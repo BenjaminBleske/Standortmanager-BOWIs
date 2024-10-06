@@ -191,11 +191,18 @@ fastify.get('/download-csv', async (request, reply) => {
       `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges || ''},${row.hausnummer || ''},${row.strasse || ''},${row.bezirk_spez || ''},${row.ort || ''},${row.bundesland || ''},${row.plz || ''},${row.land || ''}`
     ).join('\n');
 
-    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,strasse,bezirk_spez,teil,kreis,land,plz\n" + csvData;
+    const csvContent = "id,bezirk,erstellungsdatum,erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,strasse,bezirk_spez,ort,bundesland,plz,land\n" + csvData;
 
+    // Hole das aktuelle Datum und Uhrzeit und stelle sicher, dass es die deutsche Zeit ist
     const now = new Date();
-    const date = now.toISOString().split('T')[0];
-    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+    
+    // Deutsche Zeitzone (Berlin) manuell anwenden
+    const offset = now.getTimezoneOffset(); // Zeitversatz von UTC in Minuten
+    const germanTime = new Date(now.getTime() + (120 * 60 * 1000)); // Offset um 2 Stunden (in Millisekunden)
+    
+    const date = germanTime.toISOString().split('T')[0];
+    const time = germanTime.toTimeString().split(' ')[0].replace(/:/g, '-');
+
     const filename = `${date}_Sicherungskopie_${time}.csv`;
 
     reply.header('Content-Type', 'text/csv');
