@@ -11,38 +11,55 @@
   <!-- Rückkehr zur Startseite -->
   <a href="/">Zurück zur Startseite</a>
 
-  <table>
-    <thead>
+ <table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Bezirk</th>
+      <th>x_coord</th>
+      <th>y_coord</th>
+      <th>Erstellungsdatum</th>
+      <th>Uhrzeit</th>
+      <th>Sonstiges</th>
+      <th>Adresse</th>
+      <th>Hausnummer</th>
+      <th>Straße</th>
+      <th>Bezirk_spez</th>
+      <th>Ort</th>
+      <th>Bundesland</th>
+      <th>PLZ</th>
+      <th>Land</th>
+      <th>Aktion</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each optionHistory}}
       <tr>
-        <th>ID</th>
-        <th>Bezirk</th>
-        <th>x_coord</th>
-        <th>y_coord</th>
-        <th>Erstellungsdatum</th>
-        <th>Uhrzeit</th>
-        <th>Sonstiges</th>
-        <th>Aktion</th>
+        <td>{{this.id}}</td>
+        <td>{{this.bezirk}}</td>
+        <td>{{this.x_coord}}</td>
+        <td>{{this.y_coord}}</td>
+        <td>{{this.erstellungsdatum}}</td>
+        <td>{{this.erstellungszeit}}</td>
+        <td>{{this.sonstiges}}</td>
+        <td>{{this.adresse}}</td>
+        <td>{{this.hausnummer}}</td>
+        <td>{{this.strasse}}</td>
+        <td>{{this.bezirk_spez}}</td>
+        <td>{{this.ort}}</td>
+        <td>{{this.bundesland}}</td>
+        <td>{{this.plz}}</td>
+        <td>{{this.land}}</td>
+        <td>
+          <form action="/admin/delete" method="POST">
+            <input type="hidden" name="id" value="{{this.id}}">
+            <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+            <button type="submit">Löschen</button>
+          </form>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {{#each optionHistory}}
-        <tr>
-          <td>{{this.id}}</td>
-          <td>{{this.bezirk}}</td>
-          <td>{{this.x_coord}}</td>
-          <td>{{this.y_coord}}</td>
-          <td>{{this.erstellungsdatum}}</td>
-          <td>{{this.erstellungszeit}}</td>
-          <td>{{this.sonstiges}}</td>
-          <td>
-            <form action="/admin/delete" method="POST">
-              <input type="hidden" name="id" value="{{this.id}}">
-              <input type="password" name="key" placeholder="Admin-Schlüssel" required>
-              <button type="submit">Löschen</button>
-            </form>
-          </td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
+    {{/each}}
+  </tbody>
+</table>
+
 {{/if}}

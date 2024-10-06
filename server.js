@@ -187,11 +187,14 @@ fastify.get('/download-csv', async (request, reply) => {
       return reply.status(404).send({ error: 'Keine Daten in der Datenbank vorhanden.' });
     }
 
-    const csvData = rows.map(row => `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges},${row.adresse}`).join('\n');
-    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges,adresse\n" + csvData;
+    // Mappe die Daten korrekt in die CSV, ohne Wiederholungen
+    const csvData = rows.map(row => 
+      `${row.id},${row.bezirk},${row.erstellungsdatum},${row.erstellungszeit},${row.x_coord},${row.y_coord},${row.sonstiges || ''},${row.adresse || ''},${row.hausnummer || ''},${row.strasse || ''},${row.bezirk_spez || ''},${row.ort || ''},${row.bundesland || ''},${row.plz || ''},${row.land || ''}`
+    ).join('\n');
+
+    const csvContent = "ID,Bezirk,Erstellungsdatum,Erstellungszeit,x_coord,y_coord,sonstiges,adresse,hausnummer,strasse,bezirk_spez,ort,bundesland,plz,land\n" + csvData;
 
     const now = new Date();
-    now.setHours(now.getHours() + 2);
     const date = now.toISOString().split('T')[0];
     const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
     const filename = `${date}_Sicherungskopie_${time}.csv`;
@@ -203,6 +206,8 @@ fastify.get('/download-csv', async (request, reply) => {
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
 });
+
+
 
 
 
