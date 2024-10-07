@@ -3,12 +3,14 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #f9f9f9; /* Ursprünglicher Hintergrund */
     color: #333;
+    position: relative; /* Damit die Bilder in den Ecken positioniert werden können */
+    min-height: 100vh; /* Damit der Inhalt immer die volle Höhe einnimmt */
 }
 
 h1 {
-    color: #52b7c1; /* Hauptfarbe */
+    color: #0056b3; /* Ursprüngliche Hauptfarbe */
     font-size: 24px;
     text-align: center;
     margin-bottom: 20px;
@@ -25,7 +27,7 @@ input[type="radio"],
 input[type="submit"],
 button {
     padding: 10px;
-    border: 1px solid #52b7c1; /* Hauptfarbe */
+    border: 1px solid #ccc; /* Neutrale Umrandung */
     border-radius: 5px;
     font-size: 16px;
 }
@@ -36,14 +38,14 @@ input[type="text"] {
 
 button,
 input[type="submit"] {
-    background-color: #52b7c1; /* Hauptfarbe */
+    background-color: #0056b3; /* Ursprüngliche Hauptfarbe */
     color: white;
     cursor: pointer;
 }
 
 button:hover,
 input[type="submit"]:hover {
-    background-color: #3a8b93; /* Dunklere Variante der Hauptfarbe */
+    background-color: #003f7f; /* Dunklere Variante der Hauptfarbe */
 }
 
 /* Bereich für "Sonstiges" */
@@ -69,7 +71,7 @@ h3 {
 
 /* Kleinere Karte */
 #smallMap {
-    border: 2px solid #52b7c1; /* Hauptfarbe */
+    border: 2px solid #ccc;
     border-radius: 5px;
     margin-top: 10px;
 }
@@ -84,10 +86,11 @@ h3 {
 /* Statusmeldung */
 #statusMessage {
     margin-top: 15px;
-    padding: 10px;
+    padding: 20px;
     border-radius: 5px;
     text-align: center;
-    font-size: 16px;
+    font-size: 48px; /* Dreimal größer */
+    font-weight: bold; /* Fett */
     width: 100%;
 }
 
@@ -103,13 +106,28 @@ h3 {
 
 /* Links */
 a {
-    color: #52b7c1; /* Hauptfarbe */
+    color: #0056b3; /* Ursprüngliche Hauptfarbe */
     text-decoration: none;
     font-weight: bold;
 }
 
 a:hover {
     text-decoration: underline;
+}
+
+/* Positionierung der Bilder */
+#bottom-right-logo {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 150px;
+}
+
+#top-right-logo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 150px;
 }
 
 /* Für kleine Bildschirme */
@@ -132,4 +150,58 @@ a:hover {
         width: 100%;
         height: auto;
     }
+
+    #bottom-right-logo,
+    #top-right-logo {
+        width: 100px;
+    }
+
+    #statusMessage {
+        font-size: 32px; /* Kleinere Schriftgröße auf mobilen Geräten */
+    }
+  
+/* Flexbox für die Karte und den Link-Eingabebereich */
+#map-and-link-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px; /* Abstand zwischen Karte und Eingabefeld */
+    margin-top: 20px;
+}
+
+#smallMap {
+    flex: 1; /* Damit die Karte so viel Platz wie möglich einnimmt */
+    max-width: 50%; /* Maximal 50% der Breite */
+}
+
+#google-link-container {
+    display: flex;
+    flex-direction: column;
+    width: 300px; /* Fixe Breite für den Eingabebereich */
+}
+
+#googleLink {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+    width: 100%;
+}
+
+#writeButton {
+    padding: 10px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#writeButton:hover {
+    background-color: #003f7f;
+}
+
+
 }

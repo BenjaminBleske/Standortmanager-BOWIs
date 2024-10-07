@@ -15,21 +15,31 @@
 <body>
     <h1>CDU Bottrop Standort Manager für Google Maps-Kartenlinks</h1>
   
-    <!-- Google Maps Link Eingabe und Schreiben-Knopf nebeneinander -->
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <label for="googleLink">Google Maps Link:</label>
-        <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" style="flex-grow: 1;" />
-        <button id="writeButton">Schreiben</button>
-    </div>
+ 
 
     <!-- Aktuelle Uhrzeit für die kleine Karte -->
     <p id="currentTimeSmallMap"></p>
   
-
+  <!-- Google Maps Link Eingabe und Testkarte nebeneinander -->
+<div id="map-and-link-container">
     <!-- Kleinere Karte zur Vorschau des Standorts -->
     <div id="smallMap" style="width: 300px; height: 200px;"></div>
-    <!-- Anzeige der Adresse unter der kleinen Karte -->
-    <p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
+
+    <!-- Google Maps Link Eingabe -->
+    <div id="google-link-container">
+        <label for="googleLink">Google Maps Link:</label>
+        <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
+        <button id="writeButton">Schreiben</button>
+    </div>
+</div>
+
+<!-- Anzeige der Adresse unter der kleinen Karte -->
+<p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
+
+  
+
+    
+
 
     <!-- Textfeld für "Sonstiges" -->
     <label for="sonstiges">Sonstiges (optional):</label>
