@@ -70,32 +70,49 @@
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-// Extrahiert die Koordinaten aus einem Google Maps Link
+      //extraktion koordianten
 function extractCoordinates(googleMapsLink) {
-    // Zuerst wird nach dem q= Muster gesucht (vollständige Dezimal-Koordinaten)
+    console.log("Eingehender Google Maps Link:", googleMapsLink); // Zeigt den vollständigen Link
+
     const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
     const matchQ = googleMapsLink.match(regexQ);
-    if (matchQ) return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-
-    // Dann wird nach dem @-Muster gesucht (Dezimal-Koordinaten nach @)
-    const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-    const matchAt = googleMapsLink.match(regexAt);
-    if (matchAt) return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-
-    // Falls DMS-Koordinaten vorliegen (Grad, Minuten, Sekunden)
-    const regexDMS = /place\/(\d+)[°](\d+)'(\d+\.\d+)"[N|S]\+(\d+)[°](\d+)'(\d+\.\d+)"[E|W]/;
-    const matchDMS = googleMapsLink.match(regexDMS);
-    if (matchDMS) {
-        const lat = dmsToDecimal(matchDMS[1], matchDMS[2], matchDMS[3], "N"); // Nordkoordinaten
-        const lon = dmsToDecimal(matchDMS[4], matchDMS[5], matchDMS[6], "E"); // Ostkoordinaten
-        return { lat, lon };
+    if (matchQ) {
+        console.log("Koordinaten aus q= Format extrahiert:", matchQ[1], matchQ[2]);
+        return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
     }
 
-    // Debugging-Hinweis, falls der Link nicht das erwartete Format hat
-    console.error("Ungültiger Google Maps Link", googleMapsLink);
+    const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const matchAt = googleMapsLink.match(regexAt);
+    if (matchAt) {
+        console.log("Koordinaten aus @ Format extrahiert:", matchAt[1], matchAt[2]);
+        return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+    }
 
-    return null; // Falls nichts gefunden wird
+    const regexDMS = /(\d{1,2})°(\d{1,2})'(\d{1,2}\.\d+)"N.*(\d{1,2})°(\d{1,2})'(\d{1,2}\.\d+)"E/;
+    const matchDMS = googleMapsLink.match(regexDMS);
+    if (matchDMS) {
+        const lat = dmsToDecimal(parseInt(matchDMS[1]), parseInt(matchDMS[2]), parseFloat(matchDMS[3]));
+        const lon = dmsToDecimal(parseInt(matchDMS[4]), parseInt(matchDMS[5]), parseFloat(matchDMS[6]));
+        console.log("DMS-Koordinaten umgewandelt in Dezimal:", lat, lon);
+        return { lat: lat, lon: lon };
+    }
+
+    console.error("Kein passendes Format für den Link gefunden.");
+    return null;
 }
+
+function dmsToDecimal(degrees, minutes, seconds) {
+    console.log("Umrechnung von DMS in Dezimal:", degrees, minutes, seconds);
+    return degrees + minutes / 60 + seconds / 3600;
+}
+
+
+
+// Hilfsfunktion zur Umwandlung von DMS in Dezimal
+function dmsToDecimal(degrees, minutes, seconds) {
+    return degrees + minutes / 60 + seconds / 3600;
+}
+
 
 // Hilfsfunktion: Konvertiert DMS (Grad, Minuten, Sekunden) in Dezimalgrad
 function dmsToDecimal(degrees, minutes, seconds, direction) {
