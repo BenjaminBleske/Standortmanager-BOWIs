@@ -71,17 +71,39 @@
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
         // Extrahiert die Koordinaten aus einem Google Maps Link
-        function extractCoordinates(googleMapsLink) {
-            const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-            const matchQ = googleMapsLink.match(regexQ);
-            if (matchQ) return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
+  // Extrahiert die Koordinaten aus einem Google Maps Link
+function extractCoordinates(googleMapsLink) {
+    // Versuche zuerst, das q= Muster zu finden (Dezimal-Koordinaten)
+    const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const matchQ = googleMapsLink.match(regexQ);
+    if (matchQ) return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
 
-            const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-            const matchAt = googleMapsLink.match(regexAt);
-            if (matchAt) return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+    // Falls q= nicht gefunden wird, versuche das @ Muster zu finden (Dezimal-Koordinaten nach @)
+    const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const matchAt = googleMapsLink.match(regexAt);
+    if (matchAt) return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
 
-            return null;
-        }
+    // Falls DMS-Koordinaten vorliegen (Grad, Minuten, Sekunden)
+    const regexDMS = /place\/(\d+)[°](\d+)'(\d+\.\d+)"[N|S]\+(\d+)[°](\d+)'(\d+\.\d+)"[E|W]/;
+    const matchDMS = googleMapsLink.match(regexDMS);
+    if (matchDMS) {
+        const lat = dmsToDecimal(matchDMS[1], matchDMS[2], matchDMS[3], "N"); // Nordkoordinaten
+        const lon = dmsToDecimal(matchDMS[4], matchDMS[5], matchDMS[6], "E"); // Ostkoordinaten
+        return { lat, lon };
+    }
+
+    return null; // Falls nichts gefunden wird
+}
+
+// Hilfsfunktion: Konvertiert DMS (Grad, Minuten, Sekunden) in Dezimalgrad
+function dmsToDecimal(degrees, minutes, seconds, direction) {
+    let decimal = parseFloat(degrees) + parseFloat(minutes)/60 + parseFloat(seconds)/3600;
+    if (direction === "S" || direction === "W") {
+        decimal *= -1; // Süd- oder Westkoordinaten müssen negativ sein
+    }
+    return decimal;
+}
+
 
         // Globale Variable für die kleine Karte
         let smallMap;
@@ -229,7 +251,7 @@
         updateCurrentTime();
     </script>
   <footer id="site-footer">
-    &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors |
+   
     Powered by <a href="https://glitch.com" title="Glitch" target="_blank">Glitch</a> |
     Developed by Benjamin Bleske |
     Published by <a href="https://www.cdu-bottrop.de" target="_blank">2024 CDU Bottrop</a>
