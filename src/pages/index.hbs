@@ -70,15 +70,14 @@
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-        // Extrahiert die Koordinaten aus einem Google Maps Link
-  // Extrahiert die Koordinaten aus einem Google Maps Link
+// Extrahiert die Koordinaten aus einem Google Maps Link
 function extractCoordinates(googleMapsLink) {
-    // Versuche zuerst, das q= Muster zu finden (Dezimal-Koordinaten)
+    // Zuerst wird nach dem q= Muster gesucht (vollständige Dezimal-Koordinaten)
     const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
     const matchQ = googleMapsLink.match(regexQ);
     if (matchQ) return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
 
-    // Falls q= nicht gefunden wird, versuche das @ Muster zu finden (Dezimal-Koordinaten nach @)
+    // Dann wird nach dem @-Muster gesucht (Dezimal-Koordinaten nach @)
     const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
     const matchAt = googleMapsLink.match(regexAt);
     if (matchAt) return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
@@ -92,6 +91,9 @@ function extractCoordinates(googleMapsLink) {
         return { lat, lon };
     }
 
+    // Debugging-Hinweis, falls der Link nicht das erwartete Format hat
+    console.error("Ungültiger Google Maps Link", googleMapsLink);
+
     return null; // Falls nichts gefunden wird
 }
 
@@ -103,6 +105,7 @@ function dmsToDecimal(degrees, minutes, seconds, direction) {
     }
     return decimal;
 }
+
 
 
         // Globale Variable für die kleine Karte
