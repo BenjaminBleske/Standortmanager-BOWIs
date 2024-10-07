@@ -33,13 +33,25 @@
     </div>
 </div>
 
+<img id="bottom-right-logo" src="https://cdn.glitch.global/bc29fb2b-4a21-41ef-bfdc-cf22f7020748/cdu-gesamtlogo_transparent_rgb.png?v=1728299968720" alt="CDU Logo" />
+
 
 <!-- Anzeige der Adresse unter der kleinen Karte -->
 <p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
 
-  
+  <div id="button-container">
+    <a href="/download-csv" download>CSV herunterladen</a>
+    <a href="/admin">Zum Admin-Bereich</a>
+</div>
 
-    
+
+    <div id="bezirk-container">
+    <h3>Bezirk auswählen:</h3>
+    <label><input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen</label>
+    <label><input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte</label>
+    <label><input type="radio" id="sued" name="bezirk" value="Süd"> Süd</label>
+</div>
+
 
 
     <!-- Textfeld für "Sonstiges" -->
@@ -49,18 +61,8 @@
     <!-- Statusmeldung -->
     <div id="statusMessage" style="display: none;"></div>
 
-    <!-- Vorauswahl des Bezirks -->
-    <h3>Bezirk auswählen</h3>
-    <label for="bezirk">Bezirk:</label>
-    <input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen
-    <input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
-    <input type="radio" id="sued" name="bezirk" value="Süd"> Süd
-
-    <!-- CSV-Download -->
-    <h3>CSV-Datei herunterladen</h3>
-    <a href="/download-csv" download>CSV herunterladen</a>
-    <a href="/admin">Zum Admin-Bereich</a>
-
+  
+    
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
     <p id="currentTime"></p>
@@ -226,5 +228,12 @@
         loadLastLocations();
         updateCurrentTime();
     </script>
+  <footer id="site-footer">
+    &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors |
+    Powered by <a href="https://glitch.com" title="Glitch" target="_blank">Glitch</a> |
+    Developed by Benjamin Bleske |
+    Published by <a href="https://www.cdu-bottrop.de" target="_blank">2024 CDU Bottrop</a>
+</footer>
+
 </body>
 </html>

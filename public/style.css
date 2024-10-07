@@ -75,6 +75,10 @@ h3 {
     border: 2px solid #cccccc;
     border-radius: 5px;
     margin-top: 10px;
+    flex: 1;
+    width: 100%; /* Die Karte soll die Hälfte des Containers einnehmen */
+    height: 300px; /* Setzt eine explizite Höhe für die Karte */
+    max-width: 50%; /* Karte nimmt maximal 50% des Containers ein */
 }
 
 /* Adresse unter der Karte */
@@ -116,21 +120,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Positionierung der Bilder */
-#bottom-right-logo {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 150px;
-}
-
-#top-right-logo {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 150px;
-}
-
 /* Buttons für CSV-Download und Admin-Bereich */
 #button-container {
     display: flex;
@@ -153,59 +142,20 @@ a:hover {
     background-color: #3a8b93; /* Dunklere Variante der Hauptfarbe */
 }
 
-/* Für kleine Bildschirme */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    button,
-    input[type="text"],
-    input[type="submit"] {
-        font-size: 14px;
-    }
-
-    #smallMap {
-        width: 100%;
-        height: auto;
-    }
-
-    #bottom-right-logo,
-    #top-right-logo {
-        width: 100px;
-    }
-
-    #statusMessage {
-        font-size: 32px; /* Kleinere Schriftgröße auf mobilen Geräten */
-    }
-}
-
 /* Flexbox für die Karte und den Link-Eingabebereich */
 #map-and-link-container {
     display: flex;
-    justify-content: space-between; /* Lässt die Karte und den Linkbereich nebeneinander erscheinen */
-    align-items: flex-start; /* Oben ausgerichtet */
-    gap: 20px; /* Abstand zwischen Karte und Eingabefeld */
+    justify-content: flex-start; /* Lässt die Karte und das Textfeld nebeneinander erscheinen */
+    align-items: flex-start;
+    gap: 20px;
     margin-top: 20px;
+    width: 100%;
 }
 
-/* Kleinere Karte */
-#smallMap {
-    width: 300px; /* Feste Breite für die Karte */
-    height: 200px; /* Feste Höhe für die Karte */
-    border: 2px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Styling für den Google Maps Link Eingabecontainer */
 #google-link-container {
     display: flex;
     flex-direction: column; /* Eingabefeld und Button untereinander */
-    width: 300px; /* Feste Breite */
+    width: 50%; /* Textfeld nimmt ebenfalls 50% des Containers ein */
 }
 
 #googleLink {
@@ -215,16 +165,17 @@ a:hover {
     font-size: 16px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    width: 100%;
+    width: 100%; /* Vollständige Breite innerhalb des Containers */
 }
 
 #writeButton {
     padding: 10px;
-    background-color: #52b7c1; /* Verwendet die gewünschte Farbe */
+    background-color: #52b7c1;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    width: 100%;
 }
 
 #writeButton:hover {
@@ -245,4 +196,13 @@ a:hover {
 
 #bezirk-container input {
     margin-right: 5px;
+}
+
+/* Fügt das CDU-Logo unten rechts ein */
+#bottom-right-logo {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 150px;
+    height: auto;
 }
