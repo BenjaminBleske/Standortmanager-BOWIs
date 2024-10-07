@@ -74,47 +74,16 @@
 function extractCoordinates(googleMapsLink) {
     console.log("Eingehender Google Maps Link:", googleMapsLink);
 
-    // Überprüfen, ob das @-Zeichen vorhanden ist
-    if (googleMapsLink.includes('@')) {
-        // Regex für den langen Link mit @
-        const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-        const matchAt = googleMapsLink.match(regexAt);
-        if (matchAt) {
-            console.log("Koordinaten aus @ Format extrahiert:", matchAt[1], matchAt[2]);
-            return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-        }
-    } else {
-        // Regex für den kurzen Link mit q=
-        const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-        const matchQ = googleMapsLink.match(regexQ);
-        if (matchQ) {
-            console.log("Koordinaten aus q= Format extrahiert:", matchQ[1], matchQ[2]);
-            return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-        }
-    }
-
-    // Regex für DMS-Koordinaten
-    const regexDMS = /(\d{1,2})°\s*(\d{1,2})'\s*(\d{1,2}\.\d+)"\s*([NS]),\s*(\d{1,2})°\s*(\d{1,2})'\s*(\d{1,2}\.\d+)"\s*([EW])/;
-    const matchDMS = googleMapsLink.match(regexDMS);
-    if (matchDMS) {
-        const lat = dmsToDecimal(parseInt(matchDMS[1]), parseInt(matchDMS[2]), parseFloat(matchDMS[3]), matchDMS[4]);
-        const lon = dmsToDecimal(parseInt(matchDMS[5]), parseInt(matchDMS[6]), parseFloat(matchDMS[7]), matchDMS[8]);
-        console.log("DMS-Koordinaten umgewandelt in Dezimal:", lat, lon);
-        return { lat: lat, lon: lon };
+    // Überprüfen, ob das @-Zeichen vorhanden ist und Koordinaten extrahieren
+    const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const matchAt = googleMapsLink.match(regexAt);
+    if (matchAt) {
+        console.log("Koordinaten aus @ Format extrahiert:", matchAt[1], matchAt[2]);
+        return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
     }
 
     console.error("Kein passendes Format für den Link gefunden.");
     return null;
-}
-
-// Hilfsfunktion zur Umwandlung von DMS in Dezimal
-function dmsToDecimal(degrees, minutes, seconds, direction) {
-    console.log("Umrechnung von DMS in Dezimal:", degrees, minutes, seconds);
-    let decimal = degrees + minutes / 60 + seconds / 3600;
-    if (direction === 'S' || direction === 'W') {
-        decimal *= -1; // Negiere, wenn es sich um die südlichen oder westlichen Koordinaten handelt
-    }
-    return decimal;
 }
 
 
