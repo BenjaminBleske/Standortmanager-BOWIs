@@ -17,7 +17,7 @@
 
     <!-- Aktuelle Uhrzeit für die kleine Karte -->
     <p id="currentTimeSmallMap"></p>
-
+  
     <!-- Google Maps Link Eingabe und Testkarte nebeneinander -->
     <div id="map-and-link-container">
         <!-- Kleinere Karte zur Vorschau des Standorts -->
@@ -62,14 +62,7 @@
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-        // Funktion zum Anwenden des Offsets auf die Google Maps-Koordinaten
-        function applyOffset(lat, lon) {
-            const latOffset = 6.99e-6;  // Berechneter Breitengrad-Offset
-            const lonOffset = 7.84e-6;  // Berechneter Längengrad-Offset
-            return { lat: lat - latOffset, lon: lon - lonOffset };
-        }
-
-        // Extrahiert die Koordinaten aus einem Google Maps Link
+        //extraktion koordianten
         function extractCoordinates(googleMapsLink) {
             console.log("Eingehender Google Maps Link:", googleMapsLink);
 
@@ -88,29 +81,60 @@
         let smallMap;
 
         // EventListener für das Textfeld (automatisches Laden des Links)
-        document.getElementById('googleLink').addEventListener('input', async function() {
-            const googleLink = this.value;
-            const coordinates = extractCoordinates(googleLink);
+// Korrigiert die Koordinaten für die Darstellung in OpenStreetMap
+function adjustCoordinates(lat, lon) {
+    const latOffset = 0.00015; // Beispiel-Offset für die Latitude
+    const lonOffset = 0.0022; // Beispiel-Offset für die Longitude
+    return { lat: lat + latOffset, lon: lon + lonOffset };
+}
 
-            if (coordinates) {
-                const correctedCoords = applyOffset(coordinates.lat, coordinates.lon);  // Offset nur für die Anzeige anwenden
+document.getElementById('googleLink').addEventListener('input', async function() {
+    const googleLink = this.value;
+    const coordinates = extractCoordinates(googleLink);
 
-                console.log("Verwendete Koordinaten für die Karte (mit Offset):", correctedCoords.lat, correctedCoords.lon);
+    if (coordinates) {
+        // Anwenden des Offsets für OpenStreetMap
+        const adjustedCoordinates = adjustCoordinates(coordinates.lat, coordinates.lon);
 
-                if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
+        if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
 
-                smallMap = L.map('smallMap').setView([correctedCoords.lat, correctedCoords.lon], 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(smallMap);
+        smallMap = L.map('smallMap').setView([adjustedCoordinates.lat, adjustedCoordinates.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(smallMap);
 
+        const currentTime = new Date().toLocaleTimeString();
+        document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+
+        L.marker([adjustedCoordinates.lat, adjustedCoordinates.lon]).addTo(smallMap)
+            .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+    } else {
+        document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
+    }
+});
+
+
+        // Funktion, um die Adresse von OpenStreetMap zu ermitteln
+        async function fetchAddress(lat, lon) {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const data = await response.json();
+            return data.display_name || 'Adresse nicht gefunden';
+        }
+
+        // Funktion, um die aktuelle Uhrzeit an zwei Stellen anzuzeigen
+        function updateCurrentTime() {
+            setInterval(() => {
                 const currentTime = new Date().toLocaleTimeString();
                 document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+                document.getElementById('currentTime').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+            }, 1000);
+        }
 
-                L.marker([correctedCoords.lat, correctedCoords.lon]).addTo(smallMap)
-                    .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
-            } else {
-                document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
+        // EventListener für Enter-Taste im Link-Feld
+        document.getElementById('googleLink').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();  // Verhindert Neuladen der Seite
+                document.getElementById('writeButton').click();  // Simuliert Klick auf "Schreiben"-Knopf
             }
         });
 
@@ -124,8 +148,8 @@
             if (coordinates) {
                 const data = {
                     bezirk,
-                    x_coord: coordinates.lon,  // Unkorrigierte Koordinaten speichern
-                    y_coord: coordinates.lat,  // Unkorrigierte Koordinaten speichern
+                    x_coord: coordinates.lon,
+                    y_coord: coordinates.lat,
                     sonstiges: sonstiges || '',
                     erstellungsdatum: new Date().toISOString().split('T')[0]  // Datum
                 };
@@ -201,14 +225,13 @@
 
         // Rufe die letzten 5 Standorte und die Uhrzeit beim Laden der Seite ab
         loadLastLocations();
-        
+        updateCurrentTime();  // Startet das regelmäßige Aktualisieren der Zeit
     </script>
-    
+
     <footer id="site-footer">
         Powered by <a href="https://glitch.com" title="Glitch" target="_blank">Glitch</a> |
         Developed by Benjamin Bleske |
         Published by <a href="https://www.cdu-bottrop.de" target="_blank">2024 CDU Bottrop</a>
     </footer>
-
 </body>
 </html>
