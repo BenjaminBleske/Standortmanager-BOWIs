@@ -74,7 +74,6 @@
 function extractCoordinates(googleMapsLink) {
     console.log("Eingehender Google Maps Link:", googleMapsLink);
 
-    // Überprüfen, ob das @-Zeichen vorhanden ist und Koordinaten extrahieren
     const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
     const matchAt = googleMapsLink.match(regexAt);
     if (matchAt) {
@@ -95,33 +94,30 @@ function extractCoordinates(googleMapsLink) {
         let smallMap;
 
         // EventListener für das Textfeld (automatisches Laden des Links)
-        document.getElementById('googleLink').addEventListener('input', async function() {
-            const googleLink = this.value;
-            const coordinates = extractCoordinates(googleLink);
+      document.getElementById('googleLink').addEventListener('input', async function() {
+    const googleLink = this.value;
+    const coordinates = extractCoordinates(googleLink);
 
-            if (coordinates) {
-                if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
+    if (coordinates) {
+        console.log("Verwendete Koordinaten für die Karte:", coordinates.lat, coordinates.lon);
 
-                smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(smallMap);
+        if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
 
-                // Aktuelle Uhrzeit anzeigen
-                const currentTime = new Date().toLocaleTimeString();
-                document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+        smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(smallMap);
 
-                // Adresse ermitteln und unter der Karte anzeigen
-                const adresse = await fetchAddress(coordinates.lat, coordinates.lon);
-                document.getElementById('testAddressDisplay').innerText = `Adresse: ${adresse}`;
+        const currentTime = new Date().toLocaleTimeString();
+        document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
 
-                // Marker auf der Karte hinzufügen
-                L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
-                    .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
-            } else {
-                document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
-            }
-        });
+        L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
+            .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+    } else {
+        document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
+    }
+});
+
 
         // Funktion, um die Adresse von OpenStreetMap zu ermitteln
         async function fetchAddress(lat, lon) {
