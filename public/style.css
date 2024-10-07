@@ -4,13 +4,13 @@ body {
     margin: 0;
     padding: 20px;
     background-color: #f9f9f9; /* Ursprünglicher Hintergrund */
-    color: #333;
+    color: #333333;
     position: relative; /* Damit die Bilder in den Ecken positioniert werden können */
     min-height: 100vh; /* Damit der Inhalt immer die volle Höhe einnimmt */
 }
 
 h1 {
-    color: #0056b3; /* Ursprüngliche Hauptfarbe */
+    color: #52b7c1; /* Verwendet die gewünschte Farbe */
     font-size: 24px;
     text-align: center;
     margin-bottom: 20px;
@@ -27,7 +27,7 @@ input[type="radio"],
 input[type="submit"],
 button {
     padding: 10px;
-    border: 1px solid #ccc; /* Neutrale Umrandung */
+    border: 1px solid #cccccc; /* Neutrale Umrandung */
     border-radius: 5px;
     font-size: 16px;
 }
@@ -38,14 +38,15 @@ input[type="text"] {
 
 button,
 input[type="submit"] {
-    background-color: #0056b3; /* Ursprüngliche Hauptfarbe */
+    background-color: #52b7c1; /* Verwendet die gewünschte Farbe */
     color: white;
     cursor: pointer;
+    border: none;
 }
 
 button:hover,
 input[type="submit"]:hover {
-    background-color: #003f7f; /* Dunklere Variante der Hauptfarbe */
+    background-color: #3a8b93; /* Dunklere Variante der Hauptfarbe */
 }
 
 /* Bereich für "Sonstiges" */
@@ -56,7 +57,7 @@ label {
 }
 
 input[type="text"]::placeholder {
-    color: #999;
+    color: #999999;
 }
 
 /* Styling für die Radio-Buttons */
@@ -65,13 +66,13 @@ input[type="radio"] {
 }
 
 h3 {
-    color: #444;
+    color: #444444;
     margin-top: 30px;
 }
 
 /* Kleinere Karte */
 #smallMap {
-    border: 2px solid #ccc;
+    border: 2px solid #cccccc;
     border-radius: 5px;
     margin-top: 10px;
 }
@@ -80,7 +81,7 @@ h3 {
 #testAddressDisplay {
     margin-top: 10px;
     font-style: italic;
-    color: #666;
+    color: #666666;
 }
 
 /* Statusmeldung */
@@ -106,7 +107,7 @@ h3 {
 
 /* Links */
 a {
-    color: #0056b3; /* Ursprüngliche Hauptfarbe */
+    color: #52b7c1; /* Verwendet die gewünschte Farbe */
     text-decoration: none;
     font-weight: bold;
 }
@@ -128,6 +129,28 @@ a:hover {
     top: 10px;
     right: 10px;
     width: 150px;
+}
+
+/* Buttons für CSV-Download und Admin-Bereich */
+#button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#button-container a {
+    display: inline-block;
+    text-align: center;
+    padding: 10px;
+    background-color: #52b7c1;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+#button-container a:hover {
+    background-color: #3a8b93; /* Dunklere Variante der Hauptfarbe */
 }
 
 /* Für kleine Bildschirme */
@@ -159,25 +182,30 @@ a:hover {
     #statusMessage {
         font-size: 32px; /* Kleinere Schriftgröße auf mobilen Geräten */
     }
-  
+}
+
 /* Flexbox für die Karte und den Link-Eingabebereich */
 #map-and-link-container {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    justify-content: space-between; /* Lässt die Karte und den Linkbereich nebeneinander erscheinen */
+    align-items: flex-start; /* Oben ausgerichtet */
     gap: 20px; /* Abstand zwischen Karte und Eingabefeld */
     margin-top: 20px;
 }
 
+/* Kleinere Karte */
 #smallMap {
-    flex: 1; /* Damit die Karte so viel Platz wie möglich einnimmt */
-    max-width: 50%; /* Maximal 50% der Breite */
+    width: 300px; /* Feste Breite für die Karte */
+    height: 200px; /* Feste Höhe für die Karte */
+    border: 2px solid #ccc;
+    border-radius: 5px;
 }
 
+/* Styling für den Google Maps Link Eingabecontainer */
 #google-link-container {
     display: flex;
-    flex-direction: column;
-    width: 300px; /* Fixe Breite für den Eingabebereich */
+    flex-direction: column; /* Eingabefeld und Button untereinander */
+    width: 300px; /* Feste Breite */
 }
 
 #googleLink {
@@ -186,13 +214,13 @@ a:hover {
     padding: 10px;
     font-size: 16px;
     border-radius: 5px;
-    border: 1px solid #cccccc;
+    border: 1px solid #ccc;
     width: 100%;
 }
 
 #writeButton {
     padding: 10px;
-    background-color: #0056b3;
+    background-color: #52b7c1; /* Verwendet die gewünschte Farbe */
     color: white;
     border: none;
     border-radius: 5px;
@@ -200,8 +228,21 @@ a:hover {
 }
 
 #writeButton:hover {
-    background-color: #003f7f;
+    background-color: #3a8b93;
 }
 
+/* Bezirkauswahl in einer Zeile */
+#bezirk-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
 
+#bezirk-container label {
+    margin-right: 10px;
+}
+
+#bezirk-container input {
+    margin-right: 5px;
 }
