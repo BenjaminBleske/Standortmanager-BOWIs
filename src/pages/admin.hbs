@@ -50,9 +50,11 @@
   </table>
 
   <!-- Schaltfläche zum Löschen aller Einträge -->
-  <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Möchten Sie wirklich alle Einträge löschen?')">
-    <input type="hidden" name="key" value="{{yourAdminKey}}">
+<form action="/admin/delete-all" method="POST" onsubmit="return confirm('Möchten Sie wirklich alle Einträge löschen?')">
+    <!-- Admin-Schlüssel-Eingabe -->
+    <input type="password" name="key" placeholder="Admin-Schlüssel" required>
     <button type="submit" class="delete-all-button">Alle Einträge löschen</button>
-  </form>
+</form>
+
 
 {{/if}}

@@ -286,7 +286,7 @@ fastify.post("/admin/delete", async (request, reply) => {
 
 // Route zum Löschen aller Standorte
 fastify.post("/admin/delete-all", async (request, reply) => {
-    const { key } = request.body;
+    const { key } = request.body; // Hier wird der Schlüssel aus dem Formular geholt
 
     if (key !== process.env.ADMIN_KEY) {
         return reply.view("/src/pages/admin.hbs", { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
@@ -300,7 +300,7 @@ fastify.post("/admin/delete-all", async (request, reply) => {
             });
         });
 
-        return reply.redirect("/admin?key=" + key);
+        return reply.redirect("/admin?key=" + key); // Bleibe im Admin-Bereich nach dem Löschen
     } catch (error) {
         return reply.code(500).send({ error: "Fehler beim Löschen aller Standorte" });
     }
