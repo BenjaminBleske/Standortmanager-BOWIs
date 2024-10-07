@@ -14,45 +14,39 @@
 </head>
 <body>
     <h1>CDU Bottrop Standort Manager für Google Maps-Kartenlinks</h1>
-  
- 
 
     <!-- Aktuelle Uhrzeit für die kleine Karte -->
     <p id="currentTimeSmallMap"></p>
-  
-  <!-- Google Maps Link Eingabe und Testkarte nebeneinander -->
-<div id="map-and-link-container">
-    <!-- Kleinere Karte zur Vorschau des Standorts -->
-    <div id="smallMap"></div>
 
-    <!-- Google Maps Link Eingabe -->
-    <div id="google-link-container">
-        <label for="googleLink">Google Maps Link:</label>
-        <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
-        <button id="writeButton">Schreiben</button>
+    <!-- Google Maps Link Eingabe und Testkarte nebeneinander -->
+    <div id="map-and-link-container">
+        <!-- Kleinere Karte zur Vorschau des Standorts -->
+        <div id="smallMap"></div>
+
+        <!-- Google Maps Link Eingabe -->
+        <div id="google-link-container">
+            <label for="googleLink">Google Maps Link:</label>
+            <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
+            <button id="writeButton">Schreiben</button>
+        </div>
     </div>
-</div>
 
-<img id="bottom-right-logo" src="https://cdn.glitch.global/bc29fb2b-4a21-41ef-bfdc-cf22f7020748/cdu-gesamtlogo_transparent_rgb.png?v=1728299968720" alt="CDU Logo" />
+    <img id="bottom-right-logo" src="https://cdn.glitch.global/bc29fb2b-4a21-41ef-bfdc-cf22f7020748/cdu-gesamtlogo_transparent_rgb.png?v=1728299968720" alt="CDU Logo" />
 
+    <!-- Anzeige der Adresse unter der kleinen Karte -->
+    <p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
 
-<!-- Anzeige der Adresse unter der kleinen Karte -->
-<p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
-
-  <div id="button-container">
-    <a href="/download-csv" download>CSV herunterladen</a>
-    <a href="/admin">Zum Admin-Bereich</a>
-</div>
-
+    <div id="button-container">
+        <a href="/download-csv" download>CSV herunterladen</a>
+        <a href="/admin">Zum Admin-Bereich</a>
+    </div>
 
     <div id="bezirk-container">
-    <h3>Bezirk auswählen:</h3>
-    <label><input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen</label>
-    <label><input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte</label>
-    <label><input type="radio" id="sued" name="bezirk" value="Süd"> Süd</label>
-</div>
-
-
+        <h3>Bezirk auswählen:</h3>
+        <label><input type="radio" id="kirchhellen" name="bezirk" value="Kirchhellen" checked> Kirchhellen</label>
+        <label><input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte</label>
+        <label><input type="radio" id="sued" name="bezirk" value="Süd"> Süd</label>
+    </div>
 
     <!-- Textfeld für "Sonstiges" -->
     <label for="sonstiges">Sonstiges (optional):</label>
@@ -61,8 +55,6 @@
     <!-- Statusmeldung -->
     <div id="statusMessage" style="display: none;"></div>
 
-  
-    
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
     <p id="currentTime"></p>
@@ -70,76 +62,55 @@
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
-      //extraktion koordianten
-function extractCoordinates(googleMapsLink) {
-    console.log("Eingehender Google Maps Link:", googleMapsLink);
+        // Funktion zum Anwenden des Offsets auf die Google Maps-Koordinaten
+        function applyOffset(lat, lon) {
+            const latOffset = 6.99e-6;  // Berechneter Breitengrad-Offset
+            const lonOffset = 7.84e-6;  // Berechneter Längengrad-Offset
+            return { lat: lat - latOffset, lon: lon - lonOffset };
+        }
 
-    const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-    const matchAt = googleMapsLink.match(regexAt);
-    if (matchAt) {
-        console.log("Koordinaten aus @ Format extrahiert:", matchAt[1], matchAt[2]);
-        return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-    }
+        // Extrahiert die Koordinaten aus einem Google Maps Link
+        function extractCoordinates(googleMapsLink) {
+            console.log("Eingehender Google Maps Link:", googleMapsLink);
 
-    console.error("Kein passendes Format für den Link gefunden.");
-    return null;
-}
+            const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const matchAt = googleMapsLink.match(regexAt);
+            if (matchAt) {
+                console.log("Koordinaten aus @ Format extrahiert:", matchAt[1], matchAt[2]);
+                return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
+            }
 
-
-
-
-
+            console.error("Kein passendes Format für den Link gefunden.");
+            return null;
+        }
 
         // Globale Variable für die kleine Karte
         let smallMap;
 
         // EventListener für das Textfeld (automatisches Laden des Links)
-      document.getElementById('googleLink').addEventListener('input', async function() {
-    const googleLink = this.value;
-    const coordinates = extractCoordinates(googleLink);
+        document.getElementById('googleLink').addEventListener('input', async function() {
+            const googleLink = this.value;
+            const coordinates = extractCoordinates(googleLink);
 
-    if (coordinates) {
-        console.log("Verwendete Koordinaten für die Karte:", coordinates.lat, coordinates.lon);
+            if (coordinates) {
+                const correctedCoords = applyOffset(coordinates.lat, coordinates.lon);  // Offset nur für die Anzeige anwenden
 
-        if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
+                console.log("Verwendete Koordinaten für die Karte (mit Offset):", correctedCoords.lat, correctedCoords.lon);
 
-        smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(smallMap);
+                if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
 
-        const currentTime = new Date().toLocaleTimeString();
-        document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+                smallMap = L.map('smallMap').setView([correctedCoords.lat, correctedCoords.lon], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(smallMap);
 
-        L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
-            .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
-    } else {
-        document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
-    }
-});
-
-
-        // Funktion, um die Adresse von OpenStreetMap zu ermitteln
-        async function fetchAddress(lat, lon) {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-            const data = await response.json();
-            return data.display_name || 'Adresse nicht gefunden';
-        }
-
-        // Funktion, um die aktuelle Uhrzeit an zwei Stellen anzuzeigen
-        function updateCurrentTime() {
-            setInterval(() => {
                 const currentTime = new Date().toLocaleTimeString();
                 document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
-                document.getElementById('currentTime').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
-            }, 1000);
-        }
 
-        // EventListener für Enter-Taste im Link-Feld
-        document.getElementById('googleLink').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();  // Verhindert Neuladen der Seite
-                document.getElementById('writeButton').click();  // Simuliert Klick auf "Schreiben"-Knopf
+                L.marker([correctedCoords.lat, correctedCoords.lon]).addTo(smallMap)
+                    .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+            } else {
+                document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
             }
         });
 
@@ -153,8 +124,8 @@ function extractCoordinates(googleMapsLink) {
             if (coordinates) {
                 const data = {
                     bezirk,
-                    x_coord: coordinates.lon,
-                    y_coord: coordinates.lat,
+                    x_coord: coordinates.lon,  // Unkorrigierte Koordinaten speichern
+                    y_coord: coordinates.lat,  // Unkorrigierte Koordinaten speichern
                     sonstiges: sonstiges || '',
                     erstellungsdatum: new Date().toISOString().split('T')[0]  // Datum
                 };
@@ -230,14 +201,14 @@ function extractCoordinates(googleMapsLink) {
 
         // Rufe die letzten 5 Standorte und die Uhrzeit beim Laden der Seite ab
         loadLastLocations();
-        updateCurrentTime();
+        
     </script>
-  <footer id="site-footer">
-   
-    Powered by <a href="https://glitch.com" title="Glitch" target="_blank">Glitch</a> |
-    Developed by Benjamin Bleske |
-    Published by <a href="https://www.cdu-bottrop.de" target="_blank">2024 CDU Bottrop</a>
-</footer>
+    
+    <footer id="site-footer">
+        Powered by <a href="https://glitch.com" title="Glitch" target="_blank">Glitch</a> |
+        Developed by Benjamin Bleske |
+        Published by <a href="https://www.cdu-bottrop.de" target="_blank">2024 CDU Bottrop</a>
+    </footer>
 
 </body>
 </html>
