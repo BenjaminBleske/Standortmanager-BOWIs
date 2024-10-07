@@ -16,8 +16,13 @@
     <h1>CDU Bottrop Standort Manager für Google Maps-Kartenlinks</h1>
   
     <!-- Google Maps Link Eingabe -->
+  <!-- Google Maps Link Eingabe und Schreiben-Knopf nebeneinander -->
+<div style="display: flex; align-items: center; gap: 10px;">
     <label for="googleLink">Google Maps Link:</label>
-    <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" />
+    <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" style="flex-grow: 1;" />
+    <button id="writeButton">Schreiben</button>
+</div>
+
 
     <!-- Aktuelle Uhrzeit für die kleine Karte -->
     <p id="currentTimeSmallMap"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit über der kleinen Karte -->
@@ -43,8 +48,7 @@
     <input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
     <input type="radio" id="sued" name="bezirk" value="Süd"> Süd
 
-    <!-- Schreiben-Knopf zur Übermittlung an die Datenbank -->
-    <button id="writeButton">Schreiben</button>
+
 
     <!-- CSV-Download -->
     <h3>CSV-Datei herunterladen</h3>
@@ -84,8 +88,7 @@
         let smallMap;
 
         // EventListener für den Test-Button
-
-document.getElementById('testButton').addEventListener('click', async function() {
+document.getElementById('googleLink').addEventListener('input', async function() {
     const googleLink = document.getElementById('googleLink').value;
     const coordinates = extractCoordinates(googleLink);
 
@@ -107,18 +110,19 @@ document.getElementById('testButton').addEventListener('click', async function()
         const seconds = now.getSeconds().toString().padStart(2, '0');
         const currentTime = `${hours}:${minutes}:${seconds}`;
 
-        // Adresse ermitteln und nur unter der Karte anzeigen
+        // Adresse ermitteln und unter der Karte anzeigen
         const adresse = await fetchAddress(coordinates.lat, coordinates.lon);
         document.getElementById('testAddressDisplay').innerText = `Adresse: ${adresse}`;
         document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
 
-        // Füge nur den Marker auf der Karte hinzu (ohne Adresse im Popup)
+        // Füge den Marker auf der Karte hinzu (ohne Adresse im Popup)
         L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
             .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
     } else {
-        alert('Ungültiger Google Maps Link');
+        document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
     }
 });
+
 
 // Funktion, um die Adresse von OpenStreetMap zu ermitteln
 async function fetchAddress(lat, lon) {
@@ -150,6 +154,18 @@ async function fetchAddress(lat, lon) {
                 }
             }, 1000); // Aktualisierung alle 1000 Millisekunden (1 Sekunde)
         }
+      
+      // link mit enter bestätigen
+ document.getElementById('googleLink').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();  // Verhindert, dass die Seite neu geladen wird
+        document.getElementById('writeButton').click();  // Simuliert den Klick auf den "Schreiben"-Knopf
+    }
+});
+     
+      
+      
+      
       
       document.getElementById('writeButton').addEventListener('click', function() {
     const googleLink = document.getElementById('googleLink').value;
