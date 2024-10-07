@@ -1,6 +1,11 @@
 const fs = require("fs");
 const path = require("path");
-const fastify = require("fastify")({ logger: true });
+const fastify = require("fastify")({ 
+    logger: {
+        level: 'debug'  // Protokolliere alles auf Debug-Level
+    }
+});
+
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("./locations.db");
 const fetch = require('node-fetch');
