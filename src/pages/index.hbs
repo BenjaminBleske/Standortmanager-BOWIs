@@ -15,31 +15,28 @@
 <body>
     <h1>CDU Bottrop Standort Manager für Google Maps-Kartenlinks</h1>
   
-    <!-- Google Maps Link Eingabe -->
-  <!-- Google Maps Link Eingabe und Schreiben-Knopf nebeneinander -->
-<div style="display: flex; align-items: center; gap: 10px;">
-    <label for="googleLink">Google Maps Link:</label>
-    <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" style="flex-grow: 1;" />
-    <button id="writeButton">Schreiben</button>
-</div>
-
+    <!-- Google Maps Link Eingabe und Schreiben-Knopf nebeneinander -->
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="googleLink">Google Maps Link:</label>
+        <input type="text" id="googleLink" placeholder="Füge den Google Maps-Link ein" style="flex-grow: 1;" />
+        <button id="writeButton">Schreiben</button>
+    </div>
 
     <!-- Aktuelle Uhrzeit für die kleine Karte -->
-    <p id="currentTimeSmallMap"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit über der kleinen Karte -->
-
-    <!-- Testen-Knopf zur Anzeige auf kleiner Leaflet-Karte -->
-    <button id="testButton">Testen</button>
+    <p id="currentTimeSmallMap"></p>
+  
 
     <!-- Kleinere Karte zur Vorschau des Standorts -->
     <div id="smallMap" style="width: 300px; height: 200px;"></div>
     <!-- Anzeige der Adresse unter der kleinen Karte -->
     <p id="testAddressDisplay">Adresse wird hier angezeigt...</p>
-    <!-- Neues Textfeld für "Sonstiges" -->
+
+    <!-- Textfeld für "Sonstiges" -->
     <label for="sonstiges">Sonstiges (optional):</label>
     <input type="text" id="sonstiges" placeholder="optional" />
-      <!-- Statusmeldung -->
-    <div id="statusMessage" style="display: none;"></div>
 
+    <!-- Statusmeldung -->
+    <div id="statusMessage" style="display: none;"></div>
 
     <!-- Vorauswahl des Bezirks -->
     <h3>Bezirk auswählen</h3>
@@ -48,8 +45,6 @@
     <input type="radio" id="mitte" name="bezirk" value="Mitte"> Mitte
     <input type="radio" id="sued" name="bezirk" value="Süd"> Süd
 
-
-
     <!-- CSV-Download -->
     <h3>CSV-Datei herunterladen</h3>
     <a href="/download-csv" download>CSV herunterladen</a>
@@ -57,223 +52,168 @@
 
     <!-- Letzte 5 Standorte -->
     <h3>Letzte 5 Standorte</h3>
-    <p id="currentTime"></p> <!-- Dynamische Anzeige der aktuellen Uhrzeit über den letzten 5 Standorten -->
-    <div id="lastLocations"></div> <!-- Hier werden die Mini-Maps angezeigt -->
+    <p id="currentTime"></p>
+    <div id="lastLocations"></div>
 
     <!-- JavaScript zur Steuerung der Funktionen -->
     <script>
         // Extrahiert die Koordinaten aus einem Google Maps Link
         function extractCoordinates(googleMapsLink) {
-            console.log("Google Maps Link received:", googleMapsLink);
+            const regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const matchQ = googleMapsLink.match(regexQ);
+            if (matchQ) return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
 
-            let regexQ = /q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-            let matchQ = googleMapsLink.match(regexQ);
-            if (matchQ) {
-                console.log("Extracted coordinates from q= link:", matchQ);
-                return { lat: parseFloat(matchQ[1]), lon: parseFloat(matchQ[2]) };
-            }
+            const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const matchAt = googleMapsLink.match(regexAt);
+            if (matchAt) return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
 
-            let regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-            let matchAt = googleMapsLink.match(regexAt);
-            if (matchAt) {
-                console.log("Extracted coordinates from @ link:", matchAt);
-                return { lat: parseFloat(matchAt[1]), lon: parseFloat(matchAt[2]) };
-            }
-
-            console.error("Fehler: Der Link hat das erwartete Muster nicht getroffen:", googleMapsLink);
             return null;
         }
 
         // Globale Variable für die kleine Karte
         let smallMap;
 
-        // EventListener für den Test-Button
-document.getElementById('googleLink').addEventListener('input', async function() {
-    const googleLink = document.getElementById('googleLink').value;
-    const coordinates = extractCoordinates(googleLink);
+        // EventListener für das Textfeld (automatisches Laden des Links)
+        document.getElementById('googleLink').addEventListener('input', async function() {
+            const googleLink = this.value;
+            const coordinates = extractCoordinates(googleLink);
 
-    if (coordinates) {
-        if (typeof smallMap !== "undefined" && smallMap !== null) {
-            smallMap.remove();  // Entfernt die bestehende Karte
+            if (coordinates) {
+                if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
+
+                smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(smallMap);
+
+                // Aktuelle Uhrzeit anzeigen
+                const currentTime = new Date().toLocaleTimeString();
+                document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+
+                // Adresse ermitteln und unter der Karte anzeigen
+                const adresse = await fetchAddress(coordinates.lat, coordinates.lon);
+                document.getElementById('testAddressDisplay').innerText = `Adresse: ${adresse}`;
+
+                // Marker auf der Karte hinzufügen
+                L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
+                    .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
+            } else {
+                document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
+            }
+        });
+
+        // Funktion, um die Adresse von OpenStreetMap zu ermitteln
+        async function fetchAddress(lat, lon) {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const data = await response.json();
+            return data.display_name || 'Adresse nicht gefunden';
         }
-
-        smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(smallMap);
-
-        // Aktuelle Uhrzeit holen
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const seconds = now.getSeconds().toString().padStart(2, '0');
-        const currentTime = `${hours}:${minutes}:${seconds}`;
-
-        // Adresse ermitteln und unter der Karte anzeigen
-        const adresse = await fetchAddress(coordinates.lat, coordinates.lon);
-        document.getElementById('testAddressDisplay').innerText = `Adresse: ${adresse}`;
-        document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
-
-        // Füge den Marker auf der Karte hinzu (ohne Adresse im Popup)
-        L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
-            .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
-    } else {
-        document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
-    }
-});
-
-
-// Funktion, um die Adresse von OpenStreetMap zu ermitteln
-async function fetchAddress(lat, lon) {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    const data = await response.json();
-    return data.display_name || 'Adresse nicht gefunden';
-}
-
-
 
         // Funktion, um die aktuelle Uhrzeit an zwei Stellen anzuzeigen
         function updateCurrentTime() {
             setInterval(() => {
-                const now = new Date();  // Verwende die lokale Zeit ohne manuelle Verschiebung
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                const seconds = now.getSeconds().toString().padStart(2, '0');
-                
-                // Aktualisiere die Uhrzeit für die kleine Karte
-                const currentTimeElementSmallMap = document.getElementById('currentTimeSmallMap');
-                if (currentTimeElementSmallMap) {
-                    currentTimeElementSmallMap.innerText = `Aktuelle Uhrzeit: ${hours}:${minutes}:${seconds}`;
-                }
-
-                // Aktualisiere die Uhrzeit für die letzten 5 Standorte
-                const currentTimeElement = document.getElementById('currentTime');
-                if (currentTimeElement) {
-                    currentTimeElement.innerText = `Aktuelle Uhrzeit: ${hours}:${minutes}:${seconds}`;
-                }
-            }, 1000); // Aktualisierung alle 1000 Millisekunden (1 Sekunde)
+                const currentTime = new Date().toLocaleTimeString();
+                document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+                document.getElementById('currentTime').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
+            }, 1000);
         }
-      
-      // link mit enter bestätigen
- document.getElementById('googleLink').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();  // Verhindert, dass die Seite neu geladen wird
-        document.getElementById('writeButton').click();  // Simuliert den Klick auf den "Schreiben"-Knopf
-    }
-});
-     
-      
-      
-      
-      
-      document.getElementById('writeButton').addEventListener('click', function() {
-    const googleLink = document.getElementById('googleLink').value;
-    const coordinates = extractCoordinates(googleLink);
-    const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
-    const sonstiges = document.getElementById('sonstiges').value;  // Sonstiges eingeben
 
-    if (coordinates) {
-        const data = {
-            bezirk: bezirk,
-            x_coord: coordinates.lon,
-            y_coord: coordinates.lat,
-            sonstiges: sonstiges || '',  // Falls leer, wird ein leerer String gesendet
-            erstellungsdatum: new Date().toISOString().split('T')[0]  // Datum
-        };
-
-        console.log("Sending data to server:", data); // Debugging
-
-        fetch('/saveLocation', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            // Statusmeldung anzeigen
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.style.display = 'block';
-            statusMessage.innerText = result.message;
-            statusMessage.style.color = 'green';  // Erfolgsfarbe
-
-            // Statusmeldung nach 3 Sekunden ausblenden
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 3000);
-
-            loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
-            document.getElementById('googleLink').value = ''; // Textfeld nach dem Speichern leeren
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            
-            // Fehlermeldung anzeigen
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.style.display = 'block';
-            statusMessage.innerText = 'Fehler beim Speichern des Standorts.';
-            statusMessage.style.color = 'red';  // Fehlerfarbe
-
-            // Statusmeldung nach 3 Sekunden ausblenden
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 3000);
-        });
-    } else {
-        alert('Bitte einen gültigen Google Maps Link eingeben.');
-    }
-});
-
-
-
-
- // Funktion zum Abrufen der letzten 5 Standorte
-function loadLastLocations() {
-    fetch('/last-locations')
-        .then(response => response.json())
-        .then(async locations => {
-            const container = document.getElementById('lastLocations');
-            container.innerHTML = ''; // Lösche alte Mini-Maps
-
-            for (const [index, location] of locations.entries()) {
-                const mapDiv = document.createElement('div');
-                mapDiv.id = `map-${index}`;
-                mapDiv.style.width = '200px';
-                mapDiv.style.height = '150px';
-                mapDiv.style.marginBottom = '20px';
-                container.appendChild(mapDiv);
-
-                const map = L.map(`map-${index}`).setView([location.y_coord, location.x_coord], 14);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                // Füge den Marker hinzu (ohne Adresse im Popup, nur Uhrzeit)
-                L.marker([location.y_coord, location.x_coord]).addTo(map)
-                    .bindPopup(`Uhrzeit: ${location.erstellungszeit}`).openPopup();
-
-                // Ermittele die Adresse und zeige sie unter der Karte an
-                const adresse = await fetchAddress(location.y_coord, location.x_coord);
-                const addressDisplay = document.createElement('p');
-                addressDisplay.innerText = `Adresse: ${adresse}`;
-                container.appendChild(addressDisplay); // Zeige die Adresse unter der Karte an
+        // EventListener für Enter-Taste im Link-Feld
+        document.getElementById('googleLink').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();  // Verhindert Neuladen der Seite
+                document.getElementById('writeButton').click();  // Simuliert Klick auf "Schreiben"-Knopf
             }
         });
-}
 
-// Funktion, um die Adresse von OpenStreetMap zu ermitteln (gleiche wie zuvor)
-async function fetchAddress(lat, lon) {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    const data = await response.json();
-    return data.display_name || 'Adresse nicht gefunden';
-}
+        // EventListener für den Schreiben-Knopf
+        document.getElementById('writeButton').addEventListener('click', function() {
+            const googleLink = document.getElementById('googleLink').value;
+            const coordinates = extractCoordinates(googleLink);
+            const bezirk = document.querySelector('input[name="bezirk"]:checked').value;
+            const sonstiges = document.getElementById('sonstiges').value;
 
+            if (coordinates) {
+                const data = {
+                    bezirk,
+                    x_coord: coordinates.lon,
+                    y_coord: coordinates.lat,
+                    sonstiges: sonstiges || '',
+                    erstellungsdatum: new Date().toISOString().split('T')[0]  // Datum
+                };
 
-        // Rufe die letzten 5 Standorte beim Laden der Seite ab
+                fetch('/saveLocation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    // Statusmeldung anzeigen
+                    const statusMessage = document.getElementById('statusMessage');
+                    statusMessage.style.display = 'block';
+                    statusMessage.innerText = result.message;
+                    statusMessage.style.color = 'green';
+
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 3000);
+
+                    loadLastLocations();  // Letzte 5 Standorte neu laden
+                    document.getElementById('googleLink').value = '';  // Textfeld leeren
+                })
+                .catch(error => {
+                    const statusMessage = document.getElementById('statusMessage');
+                    statusMessage.style.display = 'block';
+                    statusMessage.innerText = 'Fehler beim Speichern des Standorts.';
+                    statusMessage.style.color = 'red';
+
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 3000);
+                });
+            } else {
+                alert('Bitte einen gültigen Google Maps Link eingeben.');
+            }
+        });
+
+        // Funktion zum Abrufen der letzten 5 Standorte
+        function loadLastLocations() {
+            fetch('/last-locations')
+                .then(response => response.json())
+                .then(async locations => {
+                    const container = document.getElementById('lastLocations');
+                    container.innerHTML = '';  // Lösche alte Mini-Maps
+
+                    for (const [index, location] of locations.entries()) {
+                        const mapDiv = document.createElement('div');
+                        mapDiv.id = `map-${index}`;
+                        mapDiv.style.width = '200px';
+                        mapDiv.style.height = '150px';
+                        mapDiv.style.marginBottom = '20px';
+                        container.appendChild(mapDiv);
+
+                        const map = L.map(`map-${index}`).setView([location.y_coord, location.x_coord], 14);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        // Marker hinzufügen
+                        L.marker([location.y_coord, location.x_coord]).addTo(map)
+                            .bindPopup(`Uhrzeit: ${location.erstellungszeit}`).openPopup();
+
+                        // Adresse anzeigen
+                        const adresse = await fetchAddress(location.y_coord, location.x_coord);
+                        const addressDisplay = document.createElement('p');
+                        addressDisplay.innerText = `Adresse: ${adresse}`;
+                        container.appendChild(addressDisplay);
+                    }
+                });
+        }
+
+        // Rufe die letzten 5 Standorte und die Uhrzeit beim Laden der Seite ab
         loadLastLocations();
-        updateCurrentTime();  // Aktualisiert die Uhrzeit im Frontend an beiden Stellen
-
+        updateCurrentTime();
     </script>
 </body>
 </html>

@@ -1,0 +1,135 @@
+/* Allgemeine Stile für die gesamte Seite */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h1 {
+    color: #52b7c1; /* Hauptfarbe */
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Flexbox für das Eingabefeld und den Button */
+div[style*="display: flex"] {
+    margin-bottom: 15px;
+}
+
+/* Styling für das Eingabefeld */
+input[type="text"],
+input[type="radio"],
+input[type="submit"],
+button {
+    padding: 10px;
+    border: 1px solid #52b7c1; /* Hauptfarbe */
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input[type="text"] {
+    flex-grow: 1;
+}
+
+button,
+input[type="submit"] {
+    background-color: #52b7c1; /* Hauptfarbe */
+    color: white;
+    cursor: pointer;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #3a8b93; /* Dunklere Variante der Hauptfarbe */
+}
+
+/* Bereich für "Sonstiges" */
+label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+input[type="text"]::placeholder {
+    color: #999;
+}
+
+/* Styling für die Radio-Buttons */
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+h3 {
+    color: #444;
+    margin-top: 30px;
+}
+
+/* Kleinere Karte */
+#smallMap {
+    border: 2px solid #52b7c1; /* Hauptfarbe */
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Adresse unter der Karte */
+#testAddressDisplay {
+    margin-top: 10px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Statusmeldung */
+#statusMessage {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    width: 100%;
+}
+
+#statusMessage.green {
+    background-color: #e0ffe0;
+    color: #006600;
+}
+
+#statusMessage.red {
+    background-color: #ffe0e0;
+    color: #990000;
+}
+
+/* Links */
+a {
+    color: #52b7c1; /* Hauptfarbe */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Für kleine Bildschirme */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    button,
+    input[type="text"],
+    input[type="submit"] {
+        font-size: 14px;
+    }
+
+    #smallMap {
+        width: 100%;
+        height: auto;
+    }
+}
