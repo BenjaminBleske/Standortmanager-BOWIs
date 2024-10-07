@@ -284,6 +284,29 @@ fastify.post("/admin/delete", async (request, reply) => {
   }
 });
 
+// Route zum Löschen aller Standorte
+fastify.post("/admin/delete-all", async (request, reply) => {
+    const { key } = request.body;
+
+    if (key !== process.env.ADMIN_KEY) {
+        return reply.view("/src/pages/admin.hbs", { error: "Ungültiger Admin-Schlüssel", showPasswordForm: true });
+    }
+
+    try {
+        await new Promise((resolve, reject) => {
+            db.run("DELETE FROM locations", (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+
+        return reply.redirect("/admin?key=" + key);
+    } catch (error) {
+        return reply.code(500).send({ error: "Fehler beim Löschen aller Standorte" });
+    }
+});
+
+
 // Run the server
 fastify.listen({ port: process.env.PORT || 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) {

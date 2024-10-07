@@ -11,42 +11,48 @@
   <!-- Rückkehr zur Startseite -->
   <a href="/">Zurück zur Startseite</a>
 
- <table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Bezirk</th>
-      <th>x_coord</th>
-      <th>y_coord</th>
-      <th>Erstellungsdatum</th>
-      <th>Uhrzeit</th>
-      <th>Sonstiges</th>
-      <th>Adresse</th>
-      <th>Aktion</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each optionHistory}}
+  <table>
+    <thead>
       <tr>
-        <td>{{this.id}}</td>
-        <td>{{this.bezirk}}</td>
-        <td>{{this.x_coord}}</td>
-        <td>{{this.y_coord}}</td>
-        <td>{{this.erstellungsdatum}}</td>
-        <td>{{this.erstellungszeit}}</td>
-        <td>{{this.sonstiges}}</td>
-        <td>{{this.adresse}}</td>
-    
-        <td>
-          <form action="/admin/delete" method="POST">
-            <input type="hidden" name="id" value="{{this.id}}">
-            <input type="password" name="key" placeholder="Admin-Schlüssel" required>
-            <button type="submit">Löschen</button>
-          </form>
-        </td>
+        <th>ID</th>
+        <th>Bezirk</th>
+        <th>x_coord</th>
+        <th>y_coord</th>
+        <th>Erstellungsdatum</th>
+        <th>Uhrzeit</th>
+        <th>Sonstiges</th>
+        <th>Adresse</th>
+        <th>Aktion</th>
       </tr>
-    {{/each}}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {{#each optionHistory}}
+        <tr>
+          <td>{{this.id}}</td>
+          <td>{{this.bezirk}}</td>
+          <td>{{this.x_coord}}</td>
+          <td>{{this.y_coord}}</td>
+          <td>{{this.erstellungsdatum}}</td>
+          <td>{{this.erstellungszeit}}</td>
+          <td>{{this.sonstiges}}</td>
+          <td>{{this.adresse}}</td>
+
+          <td>
+            <form action="/admin/delete" method="POST">
+              <input type="hidden" name="id" value="{{this.id}}">
+              <input type="password" name="key" placeholder="Admin-Schlüssel" required>
+              <button type="submit">Löschen</button>
+            </form>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <!-- Schaltfläche zum Löschen aller Einträge -->
+  <form action="/admin/delete-all" method="POST" onsubmit="return confirm('Möchten Sie wirklich alle Einträge löschen?')">
+    <input type="hidden" name="key" value="{{yourAdminKey}}">
+    <button type="submit" class="delete-all-button">Alle Einträge löschen</button>
+  </form>
 
 {{/if}}
