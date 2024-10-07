@@ -32,6 +32,9 @@
     <!-- Neues Textfeld für "Sonstiges" -->
     <label for="sonstiges">Sonstiges (optional):</label>
     <input type="text" id="sonstiges" placeholder="optional" />
+      <!-- Statusmeldung -->
+    <div id="statusMessage" style="display: none;"></div>
+
 
     <!-- Vorauswahl des Bezirks -->
     <h3>Bezirk auswählen</h3>
@@ -172,18 +175,39 @@ async function fetchAddress(lat, lon) {
         })
         .then(response => response.json())
         .then(result => {
-            alert(result.message);
+            // Statusmeldung anzeigen
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.style.display = 'block';
+            statusMessage.innerText = result.message;
+            statusMessage.style.color = 'green';  // Erfolgsfarbe
+
+            // Statusmeldung nach 3 Sekunden ausblenden
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
+
             loadLastLocations(); // Letzte 5 Standorte nach dem Speichern neu laden
             document.getElementById('googleLink').value = ''; // Textfeld nach dem Speichern leeren
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Fehler beim Speichern des Standorts.');
+            
+            // Fehlermeldung anzeigen
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.style.display = 'block';
+            statusMessage.innerText = 'Fehler beim Speichern des Standorts.';
+            statusMessage.style.color = 'red';  // Fehlerfarbe
+
+            // Statusmeldung nach 3 Sekunden ausblenden
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
         });
     } else {
         alert('Bitte einen gültigen Google Maps Link eingeben.');
     }
 });
+
 
 
 
