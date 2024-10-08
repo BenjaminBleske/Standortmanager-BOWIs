@@ -81,24 +81,16 @@
         let smallMap;
 
         // EventListener für das Textfeld (automatisches Laden des Links)
-// Korrigiert die Koordinaten für die Darstellung in OpenStreetMap
-function adjustCoordinates(lat, lon) {
-    const latOffset = 0.00015; // Beispiel-Offset für die Latitude
-    const lonOffset = 0.0022; // Beispiel-Offset für die Longitude
-    return { lat: lat + latOffset, lon: lon + lonOffset };
-}
+
 
 document.getElementById('googleLink').addEventListener('input', async function() {
     const googleLink = this.value;
     const coordinates = extractCoordinates(googleLink);
 
     if (coordinates) {
-        // Anwenden des Offsets für OpenStreetMap
-        const adjustedCoordinates = adjustCoordinates(coordinates.lat, coordinates.lon);
-
         if (smallMap) smallMap.remove();  // Entfernt die bestehende Karte
 
-        smallMap = L.map('smallMap').setView([adjustedCoordinates.lat, adjustedCoordinates.lon], 15);
+        smallMap = L.map('smallMap').setView([coordinates.lat, coordinates.lon], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(smallMap);
@@ -106,12 +98,14 @@ document.getElementById('googleLink').addEventListener('input', async function()
         const currentTime = new Date().toLocaleTimeString();
         document.getElementById('currentTimeSmallMap').innerText = `Aktuelle Uhrzeit: ${currentTime}`;
 
-        L.marker([adjustedCoordinates.lat, adjustedCoordinates.lon]).addTo(smallMap)
+        L.marker([coordinates.lat, coordinates.lon]).addTo(smallMap)
             .bindPopup(`Standort bestätigt<br>Uhrzeit: ${currentTime}`).openPopup();
     } else {
         document.getElementById('testAddressDisplay').innerText = 'Ungültiger Google Maps Link';
     }
 });
+
+
 
 
         // Funktion, um die Adresse von OpenStreetMap zu ermitteln
