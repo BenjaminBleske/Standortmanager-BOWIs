@@ -1,3 +1,7 @@
+require('dotenv').config();
+console.log("Geladener ADMIN_KEY:", process.env.ADMIN_KEY);
+
+
 const fs = require("fs");
 const path = require("path");
 const fastify = require("fastify")({ 
