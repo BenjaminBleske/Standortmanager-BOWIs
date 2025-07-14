@@ -4,6 +4,10 @@ console.log("Geladener ADMIN_KEY:", process.env.ADMIN_KEY);
 
 const fs = require("fs");
 const path = require("path");
+const { exec } = require('child_process');
+
+
+
 const fastify = require("fastify")({ 
     logger: {
         level: 'debug'  // Protokolliere alles auf Debug-Level
@@ -185,9 +189,7 @@ fastify.get('/download-csv', async (request, reply) => {
   try {
     const rows = await new Promise((resolve, reject) => {
       db.all('SELECT * FROM locations', [], (err, rows) => {
-        if (err) {
-          return reject(err);
-        }
+        if (err) return reject(err);
         resolve(rows);
       });
     });
@@ -202,21 +204,31 @@ fastify.get('/download-csv', async (request, reply) => {
 
     const csvContent = "id,bezirk,erstellungsdatum,erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,strasse,bezirk_spez,ort,bundesland,plz,land\n" + csvData;
 
-    // Hole das aktuelle Datum und Uhrzeit und stelle sicher, dass es die deutsche Zeit ist
+    // Datum und Dateiname erzeugen
     const now = new Date();
-    
-    // Deutsche Zeitzone (Berlin) manuell anwenden
-    const offset = now.getTimezoneOffset(); // Zeitversatz von UTC in Minuten
-    const germanTime = new Date(now.getTime() + (120 * 60 * 1000)); // Offset um 2 Stunden (in Millisekunden)
-    
+    const germanTime = new Date(now.getTime() + (120 * 60 * 1000));
     const date = germanTime.toISOString().split('T')[0];
     const time = germanTime.toTimeString().split(' ')[0].replace(/:/g, '-');
-
     const filename = `${date}_Sicherungskopie_${time}.csv`;
+    const filepath = path.join(__dirname, filename);
 
+    // CSV-Datei speichern
+    fs.writeFileSync(filepath, csvContent);
+
+    // Optional: CSV ins Repo pushen (automatischer Git-Commit & Push)
+    exec(`git add "${filename}" && git commit -m "Automatischer Export: ${filename}" && git push`, (err, stdout, stderr) => {
+      if (err) {
+        console.error('Fehler beim Git-Push:', err, stderr);
+      } else {
+        console.log('CSV wurde zu GitHub gepusht:', stdout);
+      }
+    });
+
+    // Datei dem Nutzer zum Download senden
     reply.header('Content-Type', 'text/csv');
     reply.header('Content-Disposition', `attachment; filename="${filename}"`);
     return reply.send(csvContent);
+
   } catch (err) {
     return reply.code(500).send({ status: "error", message: "Fehler beim Erstellen der CSV-Datei" });
   }
