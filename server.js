@@ -216,7 +216,7 @@ fastify.get('/download-csv', async (request, reply) => {
     fs.writeFileSync(filepath, csvContent);
 
     // Optional: CSV ins Repo pushen (automatischer Git-Commit & Push)
-    exec(`git add "${filename}" && git commit -m "Automatischer Export: ${filename}" && git push`, (err, stdout, stderr) => {
+    exec(`git add "${filename}" locations.db && git commit -m "Automatischer Export: ${filename} und DB-Backup" && git push`, (err, stdout, stderr) => {
       if (err) {
         console.error('Fehler beim Git-Push:', err, stderr);
       } else {
