@@ -1,0 +1,56 @@
+id,bezirk,erstellungsdatum,erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,strasse,bezirk_spez,ort,bundesland,plz,land
+1,Kirchhellen,2025-08-03,16:47:19,6.9392805,51.5444527,Benjamin Bleske,54, Liebrechtstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+2,Kirchhellen,2025-08-03,16:47:29,6.9385505,51.5435905,Benjamin Bleske,44a, Liebrechtstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+3,Kirchhellen,2025-08-03,16:47:37,6.9409761,51.5433807,Benjamin Bleske,29, Ernst-Ender-Straße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+4,Kirchhellen,2025-08-03,16:47:43,6.9435558,51.544693,Benjamin Bleske,48, Ernst-Ender-Straße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+5,Kirchhellen,2025-08-03,16:47:48,6.9454107,51.5478783,Benjamin Bleske,48, Rheinbabenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+6,Kirchhellen,2025-08-03,16:47:53,6.9475856,51.5476646,Benjamin Bleske,69, Rheinbabenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+7,Kirchhellen,2025-08-03,16:48:05,6.9473724,51.5453949,Benjamin Bleske,10a, Velsenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+8,Kirchhellen,2025-08-03,16:48:12,6.9453807,51.5440025,Benjamin Bleske,2a, Velsenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+9,Kirchhellen,2025-08-03,16:48:22,6.9451604,51.5435486,Benjamin Bleske,165, Aegidistraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+10,Kirchhellen,2025-08-03,16:48:28,6.9479256,51.5409012,Benjamin Bleske,126, Aegidistraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+11,Kirchhellen,2025-08-03,16:48:35,6.9500833,51.539959,Benjamin Bleske,4, Fischedickstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+12,Kirchhellen,2025-08-03,16:48:42,6.9557252,51.5403366,Benjamin Bleske,314b, Scharnhölzstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+13,Kirchhellen,2025-08-03,16:49:11,6.9559517,51.5410309,Benjamin Bleske,138, Rheinbabenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+14,Kirchhellen,2025-08-03,16:49:15,6.9547191,51.5408897,Benjamin Bleske,72, Fischedickstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+15,Kirchhellen,2025-08-03,16:49:20,6.952682,51.5427055,Benjamin Bleske,22, Maybachweg, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+16,Kirchhellen,2025-08-03,16:49:24,6.9534574,51.5410652,Benjamin Bleske,3b, Maybachweg, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+17,Kirchhellen,2025-08-03,16:49:31,6.9536657,51.5431786,Benjamin Bleske,96, Rheinbabenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+18,Kirchhellen,2025-08-03,16:49:40,6.9549789,51.5402412,Benjamin Bleske,2, Maybachweg, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+19,Kirchhellen,2025-08-03,16:49:45,6.9544511,51.5395737,Benjamin Bleske,300, Scharnhölzstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+20,Kirchhellen,2025-08-03,16:56:31,6.9344444,51.5530548,Marlene Jungmann,56, Ernst-Moritz-Arndt-Straße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+21,Kirchhellen,2025-08-03,16:56:36,6.9346581,51.5504723,Marlene Jungmann,23, Ernst-Moritz-Arndt-Straße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+22,Kirchhellen,2025-08-03,16:56:40,6.9367175,51.5479164,Marlene Jungmann,3, Vienkenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+23,Kirchhellen,2025-08-03,16:56:43,6.9366179,51.548584,Marlene Jungmann,10, Vienkenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+24,Kirchhellen,2025-08-03,16:56:48,6.9366741,51.5537415,Marlene Jungmann,67, Vienkenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+25,Kirchhellen,2025-08-03,16:56:54,6.9365773,51.5538025,Marlene Jungmann,69, Vienkenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+26,Kirchhellen,2025-08-03,16:56:59,6.9356594,51.5478973,Marlene Jungmann,9, Bügelstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+27,Kirchhellen,2025-08-03,16:57:03,6.9334497,51.5443802,Marlene Jungmann,Bolzplatz Wildenhoff, Wildenhoff, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+28,Kirchhellen,2025-08-03,16:57:07,6.9321284,51.5440254,Marlene Jungmann,30, Am Schlangenholt, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+29,Kirchhellen,2025-08-03,16:57:11,6.9307041,51.5409966,Marlene Jungmann,74d, Nordring, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+30,Kirchhellen,2025-08-03,16:57:15,6.9285169,51.5419006,Marlene Jungmann,54, In den Weywiesen, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+31,Kirchhellen,2025-08-03,16:57:20,6.931736,51.5427475,Marlene Jungmann,4, Arminiusstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+32,Kirchhellen,2025-08-03,16:57:26,6.9355631,51.5426674,Marlene Jungmann,2, Bannizastraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+33,Kirchhellen,2025-08-03,16:57:30,6.9372344,51.5421066,Marlene Jungmann,26, Liebrechtstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+34,Kirchhellen,2025-08-03,16:57:35,6.9359307,51.5397758,Marlene Jungmann,2, Liebrechtstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+35,Kirchhellen,2025-08-03,16:57:39,6.9337845,51.5397072,Marlene Jungmann,93a, Nordring, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+36,Kirchhellen,2025-08-03,16:57:43,6.9324284,51.5374565,Marlene Jungmann,177, Gladbecker Straße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+37,Kirchhellen,2025-08-03,16:57:47,6.929955,51.5380707,Marlene Jungmann,12, Schumannstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+38,Kirchhellen,2025-08-03,16:57:51,6.9317117,51.539669,Marlene Jungmann,30, Schumannstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+39,Kirchhellen,2025-08-03,16:57:55,6.9307981,51.5401039,Marlene Jungmann,4, Beethovenstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+40,Kirchhellen,2025-08-03,16:58:00,6.9297376,51.5390511,Marlene Jungmann,5, Bachstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+41,Kirchhellen,2025-08-03,16:58:04,6.9310284,51.5385323,Marlene Jungmann,14a, Am Weckelsberg, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland
+42,Kirchhellen,2025-08-03,16:58:08,6.9306178,51.5373535,Marlene Jungmann,67, Schubertstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
+43,Kirchhellen,2025-08-03,16:58:12,6.9262586,51.5369835,Marlene Jungmann,31, Schubertstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
+44,Kirchhellen,2025-08-03,18:33:09,6.9345732,51.5539169,Max Fockenberg,Adresse nicht gefunden,,,,,,
+45,Kirchhellen,2025-08-03,18:33:14,6.9343963,51.5533714,Max Fockenberg,Adresse nicht gefunden,,,,,,
+46,Kirchhellen,2025-08-03,18:33:19,6.9318805,51.5544891,Max Fockenberg,Adresse nicht gefunden,,,,,,
+47,Kirchhellen,2025-08-03,18:33:28,6.9364738,51.5554237,Max Fockenberg,Adresse nicht gefunden,,,,,,
+48,Kirchhellen,2025-08-03,18:33:32,6.9407573,51.5540276,Max Fockenberg,Adresse nicht gefunden,,,,,,
+49,Kirchhellen,2025-08-03,18:33:36,6.9451404,51.5523109,Max Fockenberg,Adresse nicht gefunden,,,,,,
+50,Kirchhellen,2025-08-03,18:33:39,6.9480038,51.5520935,Max Fockenberg,Adresse nicht gefunden,,,,,,
+51,Kirchhellen,2025-08-03,18:33:48,6.9386549,51.5487442,Max Fockenberg,Adresse nicht gefunden,,,,,,
+52,Kirchhellen,2025-08-03,18:33:54,6.9418144,51.5483437,Max Fockenberg,Adresse nicht gefunden,,,,,,
+53,Kirchhellen,2025-08-03,18:33:58,6.9426489,51.5483246,Max Fockenberg,Adresse nicht gefunden,,,,,,
+54,Kirchhellen,2025-08-03,18:34:01,6.9426188,51.5493202,Max Fockenberg,Adresse nicht gefunden,,,,,,
+55,Kirchhellen,2025-08-03,18:34:06,6.9400702,51.5512238,Max Fockenberg,Adresse nicht gefunden,,,,,,
