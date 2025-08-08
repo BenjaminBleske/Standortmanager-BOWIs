@@ -164,6 +164,7 @@ id,bezirk,erstellungsdatum,erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,
 165,Süd,2025-08-03,19:19:37,6.944653,51.5314789,Vanessa Vohs,5, Im Flaßviertel, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238, Deutschland
 166,Süd,2025-08-03,19:22:07,6.9263887,51.5239449,Vanessa Vohs,8, Luise-Hensel-Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
 167,Süd,2025-08-03,19:22:14,6.9272499,51.5230675,Vanessa Vohs,8, Horster Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
+168,Süd,2025-08-03,19:22:19,6.9243432,51.5246087,Vanessa Vohs,Immobilien Jockenhöfer U. Babiel, 28, Kirchhellener Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236
 169,Süd,2025-08-03,19:22:25,6.9257178,51.5229492,Vanessa Vohs,Kirchhellener Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland,
 170,Süd,2025-08-03,19:23:33,6.9250669,51.5209503,Vanessa Vohs,2, Kirchplatz, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
 171,Süd,2025-08-03,19:23:42,6.9235926,51.5214844,Vanessa Vohs,Elefanten-Apotheke, 48, Hochstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236
@@ -387,31 +388,3 @@ id,bezirk,erstellungsdatum,erstellungszeit,x_coord,y_coord,sonstiges,hausnummer,
 395,Kirchhellen,2025-08-05,21:48:42,6.9221639,51.5288154,Justin Hekesch,83, Kirchhellener Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
 396,Kirchhellen,2025-08-05,21:48:49,6.9218943,51.5261386,Justin Hekesch,3, Am Lamperfeld, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
 397,Kirchhellen,2025-08-05,21:48:56,6.9181758,51.5273655,Justin Hekesch,38, Parkstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-398,Kirchhellen,2025-08-08,11:58:12,6.9304416,51.5078574,Dominik Lewerentz,27, Armelerstraße, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland
-399,Kirchhellen,2025-08-08,11:58:19,6.926035,51.5116693,Dominik Lewerentz,Recyclinghof Donnerberg, 73, Südring, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242
-400,Kirchhellen,2025-08-08,11:58:23,6.9341076,51.5113305,Dominik Lewerentz,Südring, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland,
-401,Kirchhellen,2025-08-08,11:58:27,6.938608,51.5149852,Dominik Lewerentz,58, Lukas-Cranach-Straße, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238, Deutschland
-402,Kirchhellen,2025-08-08,11:58:31,6.9388155,51.5127754,Dominik Lewerentz,13,15, Devensstraße, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238
-403,Kirchhellen,2025-08-08,11:58:35,6.9385592,51.5123984,Dominik Lewerentz,Bahnhofstraße, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238, Deutschland,
-404,Kirchhellen,2025-08-08,11:58:42,6.9346998,51.5149832,Dominik Lewerentz,Friedrich-Ebert-Straße, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238, Deutschland,
-405,Kirchhellen,2025-08-08,11:58:46,6.9352234,51.5149671,Dominik Lewerentz,40, Friedrich-Ebert-Straße, Batenbrock, Bottrop, Nordrhein-Westfalen, 46238, Deutschland
-406,Kirchhellen,2025-08-08,11:58:55,6.9337426,51.5130524,Dominik Lewerentz,105, Essener Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-407,Kirchhellen,2025-08-08,11:59:00,6.9343305,51.5130477,Dominik Lewerentz,Freiherr-vom-Stein-Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland,
-408,Kirchhellen,2025-08-08,11:59:04,6.9344183,51.5124333,Dominik Lewerentz,113, Essener Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-409,Kirchhellen,2025-08-08,11:59:08,6.9312582,51.5110167,Dominik Lewerentz,29, Im Springfeld, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland
-410,Kirchhellen,2025-08-08,11:59:12,6.9368334,51.5084591,Dominik Lewerentz,59, Lehmkuhler Straße, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland
-411,Kirchhellen,2025-08-08,11:59:16,6.9356089,51.5095583,Dominik Lewerentz,Am Hauptbahnhof, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland,
-412,Kirchhellen,2025-08-08,11:59:21,6.9353523,51.5088633,Dominik Lewerentz,Bottrop Hauptbahnhof, Am Hauptbahnhof, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland
-413,Kirchhellen,2025-08-08,11:59:26,6.9340482,51.5089059,Dominik Lewerentz,3, Armelerstraße, Lehmkuhle, Bottrop, Nordrhein-Westfalen, 46242, Deutschland
-414,Kirchhellen,2025-08-08,12:03:26,6.9588837,51.6036802,Ulla Steinmann,13, Wildbruch, Overhagen, Feldhausen, Bottrop, Nordrhein-Westfalen, 46244
-415,Kirchhellen,2025-08-08,12:03:31,6.9706334,51.611478,Ulla Steinmann,10, Bonhoefferstraße, Kuhberg, Feldhausen, Bottrop, Nordrhein-Westfalen, 46244
-416,Kirchhellen,2025-08-08,12:03:36,6.9629797,51.6109211,Ulla Steinmann,Hemmers Pöhlken, Kuhberg, Feldhausen, Bottrop, Nordrhein-Westfalen, 46244, Deutschland
-417,Kirchhellen,2025-08-08,12:03:41,6.9578706,51.6085525,Ulla Steinmann,9, Im Kamp, Kuhberg, Feldhausen, Bottrop, Nordrhein-Westfalen, 46244
-418,Kirchhellen,2025-08-08,12:04:05,6.9258089,51.5263443,Max Fockenberg,30, Gerichtsstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-419,Kirchhellen,2025-08-08,12:11:10,6.9296136,51.5324516,Hermann Lanfermann,77, Richard-Wagner-Straße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-420,Kirchhellen,2025-08-08,12:11:14,6.9267216,51.5304604,Hermann Lanfermann,48, Eichenstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-421,Kirchhellen,2025-08-08,12:11:18,6.9233699,51.5371017,Hermann Lanfermann,Schubertstraße, Eigen, Bottrop, Nordrhein-Westfalen, 46240, Deutschland,
-422,Kirchhellen,2025-08-08,12:11:23,6.9358091,51.528904,Hermann Lanfermann,90, Scharnhölzstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-423,Kirchhellen,2025-08-08,12:11:26,6.9361768,51.5291862,Hermann Lanfermann,96, Scharnhölzstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-424,Kirchhellen,2025-08-08,12:11:30,6.9270053,51.5321655,Hermann Lanfermann,14a, Am Vogelpoth, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
-425,Kirchhellen,2025-08-08,12:11:34,6.9287624,51.531292,Hermann Lanfermann,66, Eichenstraße, Stadtmitte, Bottrop, Nordrhein-Westfalen, 46236, Deutschland
